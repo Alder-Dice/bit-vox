@@ -3,15 +3,15 @@ import { Play, Square, Download, Plus, Trash2, Volume2, Music, Waves, Type, Zap,
 import { renderSyllable, samplesToAudioBuffer } from './lib/sam.js';
 
 const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const OCTAVES = [1, 2, 3, 4];
-const SAM_DEFAULTS = { note: 'C', octave: 2, speed: 72, mouth: 128, throat: 128 };
+const OCTAVES = [3, 4, 5];
+const SAM_DEFAULTS = { note: 'C', octave: 4, speed: 72, mouth: 128, throat: 128 };
 
 const App = () => {
   const [inputText, setInputText] = useState("");
   const [syllables, setSyllables] = useState([
-    { id: 1, text: 'SAT', phonetic: false, note: 'C', octave: 2, speed: 72, mouth: 128, throat: 128 },
-    { id: 2, text: 'UR', phonetic: false, note: 'C', octave: 2, speed: 72, mouth: 128, throat: 128 },
-    { id: 3, text: 'DAY', phonetic: false, note: 'E', octave: 2, speed: 72, mouth: 128, throat: 128 },
+    { id: 1, text: 'SAT', note: 'C', octave: 4, speed: 72, mouth: 128, throat: 128 },
+    { id: 2, text: 'UR', note: 'C', octave: 4, speed: 72, mouth: 128, throat: 128 },
+    { id: 3, text: 'DAY', note: 'E', octave: 4, speed: 72, mouth: 128, throat: 128 },
   ]);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,7 +48,6 @@ const App = () => {
         newSyllables.push({
           id: Math.random(),
           text: chunk.toUpperCase(),
-          phonetic: false,
           ...SAM_DEFAULTS,
         });
       });
@@ -299,16 +298,6 @@ const App = () => {
                   <div className="bg-slate-950 text-cyan-500 text-[10px] font-bold px-2 py-0.5 rounded border border-slate-800">
                     PAD {sIdx + 1}
                   </div>
-                  <button
-                    onClick={() => updateSyllable(syl.id, 'phonetic', !syl.phonetic)}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded border transition-colors ${
-                      syl.phonetic
-                        ? 'bg-amber-900/50 text-amber-400 border-amber-700'
-                        : 'bg-slate-950 text-slate-500 border-slate-800 hover:text-slate-300'
-                    }`}
-                  >
-                    {syl.phonetic ? 'PHO' : 'TXT'}
-                  </button>
                   {renderErrors[syl.id] && (
                     <AlertTriangle size={12} className="text-red-400" />
                   )}
@@ -323,7 +312,7 @@ const App = () => {
                 type="text"
                 value={syl.text}
                 onChange={(e) => updateSyllable(syl.id, 'text', e.target.value.toUpperCase())}
-                placeholder={syl.phonetic ? 'SAM phonemes...' : 'Text...'}
+                placeholder="Text..."
                 className={`w-full bg-slate-950/50 border rounded-lg px-3 py-2 text-sm font-bold focus:outline-none mb-3 ${
                   renderErrors[syl.id]
                     ? 'border-red-800 text-red-300 focus:border-red-500'
@@ -379,7 +368,7 @@ const App = () => {
             </div>
           ))}
 
-          <button onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', phonetic: false, ...SAM_DEFAULTS }])}
+          <button onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', ...SAM_DEFAULTS }])}
             className="flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed border-slate-800 rounded-xl text-slate-600 hover:text-cyan-500 hover:border-cyan-900 transition-all bg-slate-900/20"
           >
             <Plus size={32} />

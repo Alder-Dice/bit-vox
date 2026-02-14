@@ -19,14 +19,9 @@ function upsample2x(input) {
 /**
  * Render a syllable object to a Float32Array at 44100 Hz.
  * Returns null if SAM fails to render the input.
- *
- * Syllable may provide pitch directly (numeric) or as note+octave
- * which gets converted via noteToSamPitch().
  */
 export function renderSyllable(syllable) {
-  const pitch = syllable.note
-    ? noteToSamPitch(syllable.note, syllable.octave)
-    : syllable.pitch;
+  const pitch = noteToSamPitch(syllable.note, syllable.octave);
 
   const sam = new SamJs({
     pitch,
@@ -36,7 +31,7 @@ export function renderSyllable(syllable) {
   });
 
   try {
-    const raw = sam.buf32(syllable.text, syllable.phonetic);
+    const raw = sam.buf32(syllable.text);
     if (raw === false) return null;
     return upsample2x(raw);
   } catch {
@@ -55,11 +50,11 @@ export function samplesToAudioBuffer(samples, audioContext) {
 
 /**
  * Convert a musical note + octave to a SAM pitch value.
- * Formula: SAM_Pitch = 22050 / Frequency_Hz
+ * Formula: SAM_Pitch = 22050 / Frequency_Hz, clamped to SAM's uint8 range.
  */
 export function noteToSamPitch(note, octave) {
   const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const noteIndex = NOTES.indexOf(note);
   const freq = 440 * Math.pow(2, (noteIndex - 9 + (octave - 4) * 12) / 12);
-  return Math.round(SAM_SAMPLE_RATE / freq);
+  return Math.max(1, Math.min(255, Math.round(SAM_SAMPLE_RATE / freq)));
 }
