@@ -1,11 +1,18 @@
 import { useState, useRef } from 'react';
-import { Play, Square, Download, Plus, Trash2, Volume2, Waves, Type, Zap, Grid, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Play, Square, Download, Plus, Trash2, Volume2, Waves, Type, Zap, Grid, ArrowRight, AlertTriangle, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { renderSyllable, samplesToAudioBuffer } from './lib/sam.js';
 
 const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
+const SAM_PARAMS = [
+  { field: 'pitch', label: 'Pitch', min: 1, max: 255 },
+  { field: 'speed', label: 'Speed', min: 40, max: 200 },
+  { field: 'mouth', label: 'Mouth', min: 0, max: 255 },
+  { field: 'throat', label: 'Throat', min: 0, max: 255 },
+];
 
 const App = () => {
   const [inputText, setInputText] = useState("");
+  const [globalVoice, setGlobalVoice] = useState({ ...SAM_DEFAULTS });
   const [syllables, setSyllables] = useState([
     { id: 1, text: 'SAT', ...SAM_DEFAULTS },
     { id: 2, text: 'UR', ...SAM_DEFAULTS },
@@ -17,6 +24,7 @@ const App = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [renderErrors, setRenderErrors] = useState({});
   const [maxSliceDuration, setMaxSliceDuration] = useState(null);
+  const [expandedCards, setExpandedCards] = useState({});
 
   const audioContextRef = useRef(null);
   const isPlayingRef = useRef(false);
@@ -46,7 +54,7 @@ const App = () => {
         newSyllables.push({
           id: Math.random(),
           text: chunk.toUpperCase(),
-          ...SAM_DEFAULTS,
+          ...globalVoice,
         });
       });
     });
@@ -61,6 +69,16 @@ const App = () => {
   const updateSyllable = (id, field, value) => {
     setSyllables(syllables.map(s => s.id === id ? { ...s, [field]: value } : s));
     setRenderErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
+  };
+
+  const updateGlobalVoice = (field, value) => {
+    setGlobalVoice(prev => ({ ...prev, [field]: value }));
+    setSyllables(prev => prev.map(s => ({ ...s, [field]: value })));
+    setRenderErrors({});
+  };
+
+  const toggleCardExpanded = (id) => {
+    setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   // --- Audio Helpers ---
@@ -218,12 +236,12 @@ const App = () => {
   };
 
   // --- Slider helper ---
-  const SliderRow = ({ label, value, min, max, sylId, field }) => (
+  const SliderRow = ({ label, value, min, max, onChange }) => (
     <div className="flex items-center gap-2">
       <span className="text-[9px] text-slate-500 uppercase w-10 shrink-0">{label}</span>
       <input
         type="range" min={min} max={max} step="1" value={value}
-        onChange={(e) => updateSyllable(sylId, field, parseInt(e.target.value))}
+        onChange={(e) => onChange(parseInt(e.target.value))}
         className="flex-1 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-600"
       />
       <span className="text-[10px] font-bold text-slate-400 w-7 text-right">{value}</span>
@@ -276,6 +294,25 @@ const App = () => {
             <Zap size={18} className="text-yellow-400" /> GENERATE
           </button>
         </div>
+        {/* Global Voice Controls */}
+        <div className="mt-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div className="flex items-center gap-2 mb-3">
+            <Settings size={14} className="text-slate-500" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voice</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
+            {SAM_PARAMS.map(p => (
+              <SliderRow
+                key={p.field}
+                label={p.label}
+                value={globalVoice[p.field]}
+                min={p.min}
+                max={p.max}
+                onChange={(v) => updateGlobalVoice(p.field, v)}
+              />
+            ))}
+          </div>
+        </div>
       </header>
 
       <main className="max-w-6xl mx-auto w-full flex-1 pb-40">
@@ -318,15 +355,30 @@ const App = () => {
                 }`}
               />
 
-              {/* SAM Parameter Sliders */}
-              <div className="flex flex-col gap-1.5 mb-3">
-                <SliderRow label="Pitch" value={syl.pitch} min={1} max={255} sylId={syl.id} field="pitch" />
-                <SliderRow label="Speed" value={syl.speed} min={40} max={200} sylId={syl.id} field="speed" />
-                <SliderRow label="Mouth" value={syl.mouth} min={0} max={255} sylId={syl.id} field="mouth" />
-                <SliderRow label="Throat" value={syl.throat} min={0} max={255} sylId={syl.id} field="throat" />
-              </div>
+              {/* Per-syllable overrides (collapsed by default) */}
+              {expandedCards[syl.id] && (
+                <div className="flex flex-col gap-1.5 mb-3 pt-2 border-t border-slate-800/50">
+                  {SAM_PARAMS.map(p => (
+                    <SliderRow
+                      key={p.field}
+                      label={p.label}
+                      value={syl[p.field]}
+                      min={p.min}
+                      max={p.max}
+                      onChange={(v) => updateSyllable(syl.id, p.field, v)}
+                    />
+                  ))}
+                </div>
+              )}
 
-              <div className="mt-auto flex justify-end">
+              <div className="mt-auto flex items-center justify-between">
+                <button
+                  onClick={() => toggleCardExpanded(syl.id)}
+                  className="flex items-center gap-1 text-[9px] text-slate-600 hover:text-slate-400 transition-colors"
+                >
+                  {expandedCards[syl.id] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  {expandedCards[syl.id] ? 'HIDE' : 'VOICE'}
+                </button>
                 <button
                   onClick={() => playSingleSyllable(syl)}
                   className="p-1.5 bg-slate-800 rounded hover:bg-slate-700 text-cyan-400"
@@ -347,7 +399,7 @@ const App = () => {
             </div>
           ))}
 
-          <button onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', ...SAM_DEFAULTS }])}
+          <button onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', ...globalVoice }])}
             className="flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed border-slate-800 rounded-xl text-slate-600 hover:text-cyan-500 hover:border-cyan-900 transition-all bg-slate-900/20"
           >
             <Plus size={32} />
