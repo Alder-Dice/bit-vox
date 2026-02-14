@@ -19,19 +19,29 @@ function upsample2x(input) {
 /**
  * Render a syllable object to a Float32Array at 44100 Hz.
  * Returns null if SAM fails to render the input.
+ *
+ * Syllable may provide pitch directly (numeric) or as note+octave
+ * which gets converted via noteToSamPitch().
  */
 export function renderSyllable(syllable) {
+  const pitch = syllable.note
+    ? noteToSamPitch(syllable.note, syllable.octave)
+    : syllable.pitch;
+
   const sam = new SamJs({
-    pitch: syllable.pitch,
+    pitch,
     speed: syllable.speed,
     mouth: syllable.mouth,
     throat: syllable.throat,
   });
 
-  const raw = sam.buf32(syllable.text, syllable.phonetic);
-  if (raw === false) return null;
-
-  return upsample2x(raw);
+  try {
+    const raw = sam.buf32(syllable.text, syllable.phonetic);
+    if (raw === false) return null;
+    return upsample2x(raw);
+  } catch {
+    return null;
+  }
 }
 
 /**

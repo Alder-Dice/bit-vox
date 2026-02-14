@@ -1,15 +1,17 @@
 import { useState, useRef } from 'react';
-import { Play, Square, Download, Plus, Trash2, Volume2, Waves, Type, Zap, Grid, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Play, Square, Download, Plus, Trash2, Volume2, Music, Waves, Type, Zap, Grid, ArrowRight, AlertTriangle } from 'lucide-react';
 import { renderSyllable, samplesToAudioBuffer } from './lib/sam.js';
 
-const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
+const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const OCTAVES = [1, 2, 3, 4];
+const SAM_DEFAULTS = { note: 'C', octave: 2, speed: 72, mouth: 128, throat: 128 };
 
 const App = () => {
   const [inputText, setInputText] = useState("");
   const [syllables, setSyllables] = useState([
-    { id: 1, text: 'SAT', phonetic: false, ...SAM_DEFAULTS },
-    { id: 2, text: 'UR', phonetic: false, ...SAM_DEFAULTS },
-    { id: 3, text: 'DAY', phonetic: false, ...SAM_DEFAULTS },
+    { id: 1, text: 'SAT', phonetic: false, note: 'C', octave: 2, speed: 72, mouth: 128, throat: 128 },
+    { id: 2, text: 'UR', phonetic: false, note: 'C', octave: 2, speed: 72, mouth: 128, throat: 128 },
+    { id: 3, text: 'DAY', phonetic: false, note: 'E', octave: 2, speed: 72, mouth: 128, throat: 128 },
   ]);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -329,9 +331,28 @@ const App = () => {
                 }`}
               />
 
-              {/* SAM Parameter Sliders */}
+              {/* Note/Octave + SAM Parameter Sliders */}
               <div className="flex flex-col gap-1.5 mb-3">
-                <SliderRow label="Pitch" value={syl.pitch} min={20} max={255} sylId={syl.id} field="pitch" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-slate-500 uppercase w-10 shrink-0">Pitch</span>
+                  <div className="flex-1 flex items-center gap-1">
+                    <Music size={10} className="text-slate-500 shrink-0" />
+                    <select
+                      value={syl.note}
+                      onChange={(e) => updateSyllable(syl.id, 'note', e.target.value)}
+                      className="bg-slate-950 text-[10px] font-bold text-slate-300 border border-slate-800 rounded px-1.5 py-0.5 focus:outline-none appearance-none cursor-pointer"
+                    >
+                      {NOTES.map(n => <option key={n} value={n} className="bg-slate-900">{n}</option>)}
+                    </select>
+                    <select
+                      value={syl.octave}
+                      onChange={(e) => updateSyllable(syl.id, 'octave', parseInt(e.target.value))}
+                      className="bg-slate-950 text-[10px] font-bold text-slate-300 border border-slate-800 rounded px-1.5 py-0.5 focus:outline-none appearance-none cursor-pointer"
+                    >
+                      {OCTAVES.map(o => <option key={o} value={o} className="bg-slate-900">{o}</option>)}
+                    </select>
+                  </div>
+                </div>
                 <SliderRow label="Speed" value={syl.speed} min={40} max={200} sylId={syl.id} field="speed" />
                 <SliderRow label="Mouth" value={syl.mouth} min={0} max={255} sylId={syl.id} field="mouth" />
                 <SliderRow label="Throat" value={syl.throat} min={0} max={255} sylId={syl.id} field="throat" />
