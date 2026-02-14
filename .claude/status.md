@@ -6,7 +6,7 @@
 
 ## Roadmap
 
-### Phase 1: Prototype & Project Setup 🔄 CURRENT
+### Phase 1: Prototype & Project Setup ✅
 - [x] Gemini Canvas prototype (formant-based speech synth)
 - [x] Vite/React project scaffolding
 - [x] Flatten project structure
@@ -17,11 +17,14 @@
 - [x] Clean up Vite template boilerplate (App.css, placeholder SVGs)
 - [x] Verify prototype runs correctly in dev server
 
-### Phase 2: SAM Integration ⏳
-- [ ] Research sam-js npm package / vendor options
-- [ ] Create SAM wrapper module (`src/lib/sam.js`)
-- [ ] Replace formant synthesis engine with SAM rendering
-- [ ] Implement per-syllable SAM parameters (speed, pitch, throat, mouth)
+### Phase 2: SAM Integration & UI 🔄 CURRENT
+- [x] Research sam-js npm package / vendor options
+- [x] Create SAM wrapper module (`src/lib/sam.js`)
+- [x] Replace formant synthesis engine with SAM rendering
+- [x] Implement per-syllable SAM parameters (speed, pitch, throat, mouth)
+- [x] Global voice controls with per-card override
+- [x] C64-themed UI overhaul (Press Start 2P font, greyscale palette, scanlines, blocky styling)
+- [x] Remove "Deluge Ready" footer box
 - [ ] Test pitch mapping: `SAM_Pitch = 22050 / Frequency_Hz`
 - Depends on: Phase 1
 
@@ -33,8 +36,6 @@
 - Depends on: Phase 2
 
 ### Phase 4: UI Polish & Features ⏳
-- [ ] Per-syllable SAM timbre controls (throat, mouth sliders)
-- [ ] Global vs per-syllable parameter toggle
 - [ ] Improved phoneme editor (dropdown with all SAM phonemes)
 - [ ] Visual waveform preview
 - Depends on: Phase 3
@@ -50,25 +51,24 @@
 
 ## Current Focus
 
-**Phase 1: Prototype & Project Setup**
+**Phase 2: SAM Integration & UI**
 
-Working on: Phase 1 complete. Ready to begin Phase 2 (SAM Integration).
+Working on: SAM integration complete. C64 UI overhaul complete (greyscale palette). Uncommitted — user testing pending.
 
 ### Completed This Phase
-- [x] Gemini Canvas prototype ported to App.jsx
-- [x] Project structure flattened (removed nested bit-vox/ directory)
-- [x] lucide-react installed
-- [x] Documentation initialized
-- [x] Tailwind CSS v4 installed and configured (@tailwindcss/vite plugin)
-- [x] Git repo initialized, first commit made
-- [x] Vite template boilerplate removed (App.css, react.svg, vite.svg)
-- [x] Prototype verified running in dev server
+- [x] SAM wrapper module created
+- [x] Formant engine replaced with SAM rendering
+- [x] Per-syllable SAM parameters (pitch, speed, mouth, throat)
+- [x] Global voice controls, collapsible per-card overrides
+- [x] C64 UI: Press Start 2P pixel font, greyscale palette, scanline overlay
+- [x] C64 UI: Square borders, no rounded corners, blocky slider styling
+- [x] C64 UI: Pad numbers as [01] [02] bracket style
+- [x] Removed "Deluge Ready" footer box, kept stats row
 
 ### Blocked / Known Issues
 1. **Node.js version**: System has Node 18.19.1, Vite 7.x wants 20.19+. Builds work but shows warning.
    - Impact: Warning only, no functional issue yet
    - Next step: Consider upgrading Node or pinning Vite version
-2. **Stray bit-vox/ subdirectory**: Old terminal session recreated a partial `bit-vox/` with just node_modules. Safe to delete with `rm -rf bit-vox/`.
 
 ---
 

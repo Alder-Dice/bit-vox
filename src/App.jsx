@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Play, Square, Download, Plus, Trash2, Volume2, Waves, Type, Zap, Grid, ArrowRight, AlertTriangle, ChevronDown, ChevronUp, Settings } from 'lucide-react';
+import { Play, Square, Download, Plus, Trash2, Volume2, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { renderSyllable, samplesToAudioBuffer } from './lib/sam.js';
 
 const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
@@ -235,70 +235,96 @@ const App = () => {
     setIsExporting(false);
   };
 
+  // --- Pad number formatter ---
+  const padNum = (n) => `[${String(n).padStart(2, '0')}]`;
+
   // --- Slider helper ---
   const SliderRow = ({ label, value, min, max, onChange }) => (
     <div className="flex items-center gap-2">
-      <span className="text-[9px] text-slate-500 uppercase w-10 shrink-0">{label}</span>
+      <span className="text-[8px] w-12 shrink-0" style={{ color: 'var(--c64-muted)' }}>{label}</span>
       <input
         type="range" min={min} max={max} step="1" value={value}
         onChange={(e) => onChange(parseInt(e.target.value))}
-        className="flex-1 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-600"
+        className="flex-1 h-1 cursor-pointer"
       />
-      <span className="text-[10px] font-bold text-slate-400 w-7 text-right">{value}</span>
+      <span className="text-[8px] font-bold w-7 text-right" style={{ color: 'var(--c64-cyan)' }}>{value}</span>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-mono flex flex-col">
-      <header className="max-w-6xl mx-auto w-full mb-8 border-b border-slate-800 pb-6">
+    <div className="min-h-screen p-4 md:p-8 flex flex-col" style={{ background: 'var(--c64-bg)', color: 'var(--c64-text)' }}>
+      <header className="max-w-6xl mx-auto w-full mb-8 pb-6" style={{ borderBottom: '2px solid var(--c64-border)' }}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black tracking-tighter text-cyan-400 flex items-center gap-2 italic">
-              <Waves className="w-8 h-8 not-italic" /> BIT-VOX DELUGE
+            <h1 className="text-xl font-bold tracking-wide" style={{ color: 'var(--c64-cyan)' }}>
+              BIT-VOX DELUGE
             </h1>
-            <p className="text-slate-500 text-xs mt-1 uppercase tracking-widest">Auto-Slicing Speech Sequencer</p>
+            <p className="text-[8px] mt-2 tracking-widest" style={{ color: 'var(--c64-muted)' }}>AUTO-SLICING SPEECH SEQUENCER</p>
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={handlePreview}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition-all ${isPlaying ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_15px_rgba(8,145,178,0.3)]'}`}
+              className="flex items-center gap-2 px-4 py-2 font-bold text-[10px]"
+              style={{
+                background: isPlaying ? 'var(--c64-red)' : 'var(--c64-panel)',
+                border: `2px solid ${isPlaying ? 'var(--c64-red)' : 'var(--c64-cyan)'}`,
+                color: isPlaying ? 'var(--c64-text)' : 'var(--c64-cyan)',
+              }}
             >
-              {isPlaying ? <Square size={18} /> : <Play size={18} />}
+              {isPlaying ? <Square size={14} /> : <Play size={14} />}
               {isPlaying ? 'STOP' : 'PREVIEW'}
             </button>
             <button
               onClick={handleExport}
               disabled={isExporting}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] ${isExporting ? 'bg-slate-700 text-slate-400 cursor-wait' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
+              className="flex items-center gap-2 px-4 py-2 font-bold text-[10px]"
+              style={{
+                background: isExporting ? 'var(--c64-panel)' : 'var(--c64-green)',
+                border: `2px solid ${isExporting ? 'var(--c64-muted)' : 'var(--c64-green)'}`,
+                color: isExporting ? 'var(--c64-muted)' : '#fff',
+                cursor: isExporting ? 'wait' : 'pointer',
+              }}
             >
-              <Download size={18} />
+              <Download size={14} />
               {isExporting ? 'RENDERING...' : 'EXPORT KIT'}
             </button>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col md:flex-row gap-2 bg-slate-900 p-3 rounded-xl border border-slate-800 shadow-2xl">
-          <div className="flex-1 relative">
-            <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+        <div className="mt-6 flex flex-col md:flex-row gap-2 p-3" style={{ background: 'var(--c64-panel)', border: '2px solid var(--c64-border)' }}>
+          <div className="flex-1">
             <input
               type="text"
-              placeholder="Type sentence (e.g. SATURDAY BANANA DELUGE)..."
+              placeholder="TYPE SENTENCE..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-12 pr-4 py-3 text-cyan-400 focus:outline-none focus:border-cyan-500 uppercase font-bold placeholder:text-slate-700"
+              className="w-full px-3 py-2 text-[10px] font-bold focus:outline-none"
+              style={{
+                background: 'var(--c64-bg)',
+                border: '2px solid var(--c64-border)',
+                color: 'var(--c64-cyan)',
+              }}
               onKeyDown={(e) => e.key === 'Enter' && convertTextToSyllables()}
             />
           </div>
-          <button onClick={convertTextToSyllables} className="flex items-center justify-center gap-2 px-8 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-all text-sm font-black text-cyan-400 border border-slate-700">
-            <Zap size={18} className="text-yellow-400" /> GENERATE
+          <button
+            onClick={convertTextToSyllables}
+            className="flex items-center justify-center gap-2 px-6 py-2 text-[10px] font-bold"
+            style={{
+              background: 'var(--c64-panel)',
+              border: '2px solid var(--c64-cyan)',
+              color: 'var(--c64-cyan)',
+            }}
+          >
+            GENERATE
           </button>
         </div>
+
         {/* Global Voice Controls */}
-        <div className="mt-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+        <div className="mt-4 p-4" style={{ background: 'var(--c64-panel)', border: '2px solid var(--c64-border)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Settings size={14} className="text-slate-500" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voice</span>
+            <span className="text-[8px] font-bold tracking-widest" style={{ color: 'var(--c64-muted)' }}>VOICE</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
             {SAM_PARAMS.map(p => (
@@ -320,25 +346,33 @@ const App = () => {
           {syllables.map((syl, sIdx) => (
             <div
               key={syl.id}
-              className={`relative flex flex-col p-4 rounded-xl border-2 transition-all group ${
-                renderErrors[syl.id]
-                  ? 'bg-red-950/30 border-red-800'
-                  : currentSyllableIdx === sIdx
-                    ? 'bg-slate-800 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.2)]'
-                    : 'bg-slate-900 border-slate-800'
-              }`}
+              className="relative flex flex-col p-4 group"
+              style={{
+                background: 'var(--c64-panel)',
+                border: `2px solid ${
+                  renderErrors[syl.id]
+                    ? 'var(--c64-red)'
+                    : currentSyllableIdx === sIdx
+                      ? 'var(--c64-cyan)'
+                      : 'var(--c64-border)'
+                }`,
+              }}
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="bg-slate-950 text-cyan-500 text-[10px] font-bold px-2 py-0.5 rounded border border-slate-800">
-                    PAD {sIdx + 1}
-                  </div>
+                  <span className="text-[8px] font-bold px-2 py-0.5" style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}>
+                    {padNum(sIdx + 1)}
+                  </span>
                   {renderErrors[syl.id] && (
-                    <AlertTriangle size={12} className="text-red-400" />
+                    <AlertTriangle size={10} style={{ color: 'var(--c64-red)' }} />
                   )}
                 </div>
-                <button onClick={() => setSyllables(syllables.filter(s => s.id !== syl.id))} className="text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Trash2 size={14} />
+                <button
+                  onClick={() => setSyllables(syllables.filter(s => s.id !== syl.id))}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: 'var(--c64-muted)' }}
+                >
+                  <Trash2 size={12} />
                 </button>
               </div>
 
@@ -347,17 +381,18 @@ const App = () => {
                 type="text"
                 value={syl.text}
                 onChange={(e) => updateSyllable(syl.id, 'text', e.target.value.toUpperCase())}
-                placeholder="Text..."
-                className={`w-full bg-slate-950/50 border rounded-lg px-3 py-2 text-sm font-bold focus:outline-none mb-3 ${
-                  renderErrors[syl.id]
-                    ? 'border-red-800 text-red-300 focus:border-red-500'
-                    : 'border-slate-800/50 text-cyan-300 focus:border-cyan-500'
-                }`}
+                placeholder="TEXT..."
+                className="w-full px-3 py-2 text-[10px] font-bold focus:outline-none mb-3"
+                style={{
+                  background: 'var(--c64-bg)',
+                  border: `2px solid ${renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-border)'}`,
+                  color: renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-cyan)',
+                }}
               />
 
               {/* Per-syllable overrides (collapsed by default) */}
               {expandedCards[syl.id] && (
-                <div className="flex flex-col gap-1.5 mb-3 pt-2 border-t border-slate-800/50">
+                <div className="flex flex-col gap-1.5 mb-3 pt-2" style={{ borderTop: '1px solid var(--c64-border)' }}>
                   {SAM_PARAMS.map(p => (
                     <SliderRow
                       key={p.field}
@@ -374,16 +409,18 @@ const App = () => {
               <div className="mt-auto flex items-center justify-between">
                 <button
                   onClick={() => toggleCardExpanded(syl.id)}
-                  className="flex items-center gap-1 text-[9px] text-slate-600 hover:text-slate-400 transition-colors"
+                  className="flex items-center gap-1 text-[8px]"
+                  style={{ color: 'var(--c64-muted)' }}
                 >
-                  {expandedCards[syl.id] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  {expandedCards[syl.id] ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
                   {expandedCards[syl.id] ? 'HIDE' : 'VOICE'}
                 </button>
                 <button
                   onClick={() => playSingleSyllable(syl)}
-                  className="p-1.5 bg-slate-800 rounded hover:bg-slate-700 text-cyan-400"
+                  className="p-1.5"
+                  style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}
                 >
-                  <Volume2 size={14} />
+                  <Volume2 size={12} />
                 </button>
               </div>
             </div>
@@ -391,56 +428,50 @@ const App = () => {
 
           {/* Padding Slices */}
           {Array.from({ length: paddingCount }).map((_, i) => (
-            <div key={`pad-${i}`} className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-slate-800 bg-slate-900/20 opacity-50">
-              <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mb-2">Blank Pad {activeCount + i + 1}</span>
-              <div className="w-8 h-8 rounded-full border border-slate-800 flex items-center justify-center text-slate-700">
-                <Grid size={16} />
-              </div>
+            <div
+              key={`pad-${i}`}
+              className="flex flex-col items-center justify-center p-4 opacity-40"
+              style={{ border: '2px dashed var(--c64-border)', background: 'var(--c64-panel)' }}
+            >
+              <span className="text-[8px] font-bold tracking-widest mb-2" style={{ color: 'var(--c64-muted)' }}>
+                BLANK {padNum(activeCount + i + 1)}
+              </span>
             </div>
           ))}
 
-          <button onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', ...globalVoice }])}
-            className="flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed border-slate-800 rounded-xl text-slate-600 hover:text-cyan-500 hover:border-cyan-900 transition-all bg-slate-900/20"
+          <button
+            onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', ...globalVoice }])}
+            className="flex flex-col items-center justify-center gap-2 p-8"
+            style={{ border: '2px dashed var(--c64-border)', color: 'var(--c64-muted)', background: 'transparent' }}
           >
-            <Plus size={32} />
-            <span className="text-xs font-bold uppercase tracking-widest">Add Syllable</span>
+            <Plus size={24} />
+            <span className="text-[8px] font-bold tracking-widest">ADD SYLLABLE</span>
           </button>
         </div>
       </main>
 
-      {/* Deluge Stats Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-6 z-50">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-
-          <div className="flex items-center gap-6">
-            <div className="flex flex-col">
-              <span className="text-[9px] text-slate-500 uppercase tracking-tighter">Active Slices</span>
-              <span className="text-xl font-black text-cyan-400">{activeCount}</span>
-            </div>
-
-            <ArrowRight size={16} className="text-slate-700" />
-
-            <div className="flex flex-col">
-              <span className="text-[9px] text-slate-500 uppercase tracking-tighter">Deluge Target</span>
-              <span className="text-xl font-black text-emerald-400">{targetSliceCount} <span className="text-xs font-normal text-slate-500">Pads</span></span>
-            </div>
-
-            <div className="h-8 w-px bg-slate-800 mx-2 hidden md:block" />
-
-            <div className="flex flex-col hidden md:flex">
-              <span className="text-[9px] text-slate-500 uppercase tracking-tighter">Uniform Slice Len</span>
-              <span className="text-lg font-bold text-slate-300">
-                {maxSliceDuration !== null ? `${maxSliceDuration.toFixed(2)}s` : '\u2014'}
-              </span>
-            </div>
+      {/* Stats Footer */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 z-50" style={{ background: 'var(--c64-panel)', borderTop: '2px solid var(--c64-border)' }}>
+        <div className="max-w-6xl mx-auto flex items-center gap-6 text-[8px]">
+          <div className="flex flex-col">
+            <span style={{ color: 'var(--c64-muted)' }}>ACTIVE SLICES</span>
+            <span className="text-base font-bold" style={{ color: 'var(--c64-cyan)' }}>{activeCount}</span>
           </div>
 
-          <div className="flex items-center gap-3 bg-slate-950 px-4 py-3 rounded-lg border border-slate-800">
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Deluge Ready</span>
-              <span className="text-[9px] text-slate-500">Set "Slices" to {targetSliceCount} on import</span>
-            </div>
-            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+          <span style={{ color: 'var(--c64-muted)' }}>&gt;</span>
+
+          <div className="flex flex-col">
+            <span style={{ color: 'var(--c64-muted)' }}>DELUGE TARGET</span>
+            <span className="text-base font-bold" style={{ color: 'var(--c64-green)' }}>{targetSliceCount} <span className="text-[8px]" style={{ color: 'var(--c64-muted)' }}>PADS</span></span>
+          </div>
+
+          <div className="hidden md:block" style={{ width: '1px', height: '24px', background: 'var(--c64-border)' }} />
+
+          <div className="hidden md:flex flex-col">
+            <span style={{ color: 'var(--c64-muted)' }}>UNIFORM SLICE LEN</span>
+            <span className="text-base font-bold" style={{ color: 'var(--c64-text)' }}>
+              {maxSliceDuration !== null ? `${maxSliceDuration.toFixed(2)}S` : '\u2014'}
+            </span>
           </div>
         </div>
       </div>

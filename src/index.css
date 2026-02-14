@@ -1,1 +1,69 @@
 @import "tailwindcss";
+
+:root {
+  --c64-bg: #000000;
+  --c64-panel: #1a1a1a;
+  --c64-border: #6C6C6C;
+  --c64-text: #FFFFFF;
+  --c64-cyan: #FFFFFF;
+  --c64-red: #959595;
+  --c64-green: #B8B8B8;
+  --c64-yellow: #B8B8B8;
+  --c64-muted: #B8B8B8;
+}
+
+body {
+  font-family: 'Press Start 2P', monospace;
+  background-color: var(--c64-bg);
+  color: var(--c64-text);
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
+}
+
+/* Range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--c64-panel);
+  border: 1px solid var(--c64-border);
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--c64-cyan);
+  border: 2px solid var(--c64-border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--c64-cyan);
+  border: 2px solid var(--c64-border);
+  border-radius: 0;
+  cursor: pointer;
+}
