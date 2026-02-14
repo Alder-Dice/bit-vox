@@ -2,59 +2,39 @@
 
 > Behavioral rules discovered during development. Read at session start.
 
----
+## Format Rules
 
-## How to Use This File
-
-**Add entries when**:
-- Something non-obvious breaks and you figure out why
-- A counter-intuitive approach works better than the "obvious" one
-- You're likely to make the same mistake again without a reminder
-
-**Don't add**:
-- One-off bug fixes
-- Common knowledge
-- Things covered by linters/formatters
-
-**Format**:
-```markdown
-### [Tech/Area]: [What to do / What not to do]
-- **Rule**: Specific actionable behavior
-- **Why**: Brief rationale
-- **Context**: Where this applies
-```
+- **3-4 lines max per rule**: Rule, Why, Context. No code blocks unless the pattern is genuinely ambiguous from prose alone.
+- **Add when**: Something non-obvious breaks, a counter-intuitive approach works, or you'd repeat the mistake without a reminder.
+- **Don't add**: One-off fixes, common knowledge, or anything covered by linters.
+- **Commit after adding entries.**
+- **When user requests conflict with a rule here, cite it and propose alternatives.**
 
 ---
 
 ## Active Rules
 
 ### Deluge: Slice count must be a multiple of 8
-- **Rule**: `targetSliceCount = Math.ceil(count / 8) * 8` — never skip this
+- **Rule**: `targetSliceCount = Math.ceil(count / 8) * 8` — never skip this.
 - **Why**: Deluge hardware expects 8/16/32/64 slices for automatic pad mapping. Wrong count = slices won't align to pads.
-- **Context**: `handleExport()` in App.jsx
+- **Context**: `handleExport()` in App.jsx.
 
 ### Deluge: All slices must be uniform length
-- **Rule**: Pad every slice with silence to match the longest syllable's duration
-- **Why**: Non-uniform slices cause Deluge to misalign pad boundaries
-- **Context**: Export logic — `maxDuration` calculation
+- **Rule**: Pad every slice with silence to match the longest syllable's duration.
+- **Why**: Non-uniform slices cause Deluge to misalign pad boundaries.
+- **Context**: Export logic — `maxDuration` calculation.
 
 ### SAM: Pitch formula is inverted
-- **Rule**: `SAM_Pitch = 22050 / Frequency_Hz` — higher frequency = lower SAM pitch value
-- **Why**: SAM uses a sample-rate-relative pitch parameter, not Hz directly
-- **Context**: Will apply when sam-js integration begins (Phase 2)
+- **Rule**: `SAM_Pitch = 22050 / Frequency_Hz` — higher frequency = lower SAM pitch value.
+- **Why**: SAM uses a sample-rate-relative pitch parameter, not Hz directly.
+- **Context**: Will apply when sam-js integration begins (Phase 2).
 
 ### Tailwind v4: Use @tailwindcss/vite plugin, not PostCSS
 - **Rule**: Install `@tailwindcss/vite` and add to `vite.config.js` plugins. CSS entry is just `@import "tailwindcss"`.
 - **Why**: Tailwind v4 dropped the PostCSS-based setup. The Vite plugin approach is simpler and faster.
-- **Context**: `vite.config.js`, `src/index.css`
+- **Context**: `vite.config.js`, `src/index.css`.
 
 ### Prototype: autoSyllabize regex is solid
-- **Rule**: Keep the syllabizer regex `/[^aeiouy]*[aeiouy]+(?:[^aeiouy](?![aeiouy]))*/gi` as-is
+- **Rule**: Keep the syllabizer regex `/[^aeiouy]*[aeiouy]+(?:[^aeiouy](?![aeiouy]))*/gi` as-is.
 - **Why**: Validated in Gemini Canvas prototyping. Handles most English words correctly.
-- **Context**: `autoSyllabize()` in App.jsx
-
----
-
-## Debugging Notes
-
-(None yet)
+- **Context**: `autoSyllabize()` in App.jsx.
