@@ -1,6 +1,5 @@
 import SamJs from 'sam-js';
 
-const SAM_SAMPLE_RATE = 22050;
 const TARGET_SAMPLE_RATE = 44100;
 
 /**
@@ -21,10 +20,8 @@ function upsample2x(input) {
  * Returns null if SAM fails to render the input.
  */
 export function renderSyllable(syllable) {
-  const pitch = noteToSamPitch(syllable.note, syllable.octave);
-
   const sam = new SamJs({
-    pitch,
+    pitch: syllable.pitch,
     speed: syllable.speed,
     mouth: syllable.mouth,
     throat: syllable.throat,
@@ -48,13 +45,3 @@ export function samplesToAudioBuffer(samples, audioContext) {
   return buffer;
 }
 
-/**
- * Convert a musical note + octave to a SAM pitch value.
- * Formula: SAM_Pitch = 22050 / Frequency_Hz, clamped to SAM's uint8 range.
- */
-export function noteToSamPitch(note, octave) {
-  const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const noteIndex = NOTES.indexOf(note);
-  const freq = 440 * Math.pow(2, (noteIndex - 9 + (octave - 4) * 12) / 12);
-  return Math.max(1, Math.min(255, Math.round(SAM_SAMPLE_RATE / freq)));
-}
