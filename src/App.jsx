@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Play, Square, Download, Plus, Trash2, Volume2, Waves, Type, Zap, Grid, ArrowRight, AlertTriangle } from 'lucide-react';
 import { renderSyllable, samplesToAudioBuffer } from './lib/sam.js';
 
