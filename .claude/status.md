@@ -12,9 +12,10 @@
 - [x] Flatten project structure
 - [x] Install dependencies (lucide-react)
 - [x] Project documentation (CLAUDE.md, status.md, architecture.md, LESSONS.md)
-- [ ] Install & configure Tailwind CSS (prototype uses Tailwind classes)
-- [ ] Initialize git repository
-- [ ] Verify prototype runs correctly in dev server
+- [x] Install & configure Tailwind CSS v4
+- [x] Initialize git repository
+- [x] Clean up Vite template boilerplate (App.css, placeholder SVGs)
+- [x] Verify prototype runs correctly in dev server
 
 ### Phase 2: SAM Integration ⏳
 - [ ] Research sam-js npm package / vendor options
@@ -51,25 +52,23 @@
 
 **Phase 1: Prototype & Project Setup**
 
-Working on: Documentation setup and project structure cleanup
+Working on: Phase 1 complete. Ready to begin Phase 2 (SAM Integration).
 
 ### Completed This Phase
 - [x] Gemini Canvas prototype ported to App.jsx
 - [x] Project structure flattened (removed nested bit-vox/ directory)
 - [x] lucide-react installed
 - [x] Documentation initialized
-
-### In Progress
-- [ ] Tailwind CSS installation
-- [ ] Git init + first commit
+- [x] Tailwind CSS v4 installed and configured (@tailwindcss/vite plugin)
+- [x] Git repo initialized, first commit made
+- [x] Vite template boilerplate removed (App.css, react.svg, vite.svg)
+- [x] Prototype verified running in dev server
 
 ### Blocked / Known Issues
-1. **Tailwind not installed**: App.jsx uses Tailwind classes extensively but Tailwind CSS is not configured. UI will not render correctly until installed.
-   - Impact: App renders but without any styling
-   - Next step: Install Tailwind CSS v4 and configure with Vite
-2. **Node.js version**: System has Node 18.19.1, Vite 7.x wants 20.19+. Builds work but shows warning.
+1. **Node.js version**: System has Node 18.19.1, Vite 7.x wants 20.19+. Builds work but shows warning.
    - Impact: Warning only, no functional issue yet
    - Next step: Consider upgrading Node or pinning Vite version
+2. **Stray bit-vox/ subdirectory**: Old terminal session recreated a partial `bit-vox/` with just node_modules. Safe to delete with `rm -rf bit-vox/`.
 
 ---
 

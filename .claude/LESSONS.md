@@ -43,6 +43,11 @@
 - **Why**: SAM uses a sample-rate-relative pitch parameter, not Hz directly
 - **Context**: Will apply when sam-js integration begins (Phase 2)
 
+### Tailwind v4: Use @tailwindcss/vite plugin, not PostCSS
+- **Rule**: Install `@tailwindcss/vite` and add to `vite.config.js` plugins. CSS entry is just `@import "tailwindcss"`.
+- **Why**: Tailwind v4 dropped the PostCSS-based setup. The Vite plugin approach is simpler and faster.
+- **Context**: `vite.config.js`, `src/index.css`
+
 ### Prototype: autoSyllabize regex is solid
 - **Rule**: Keep the syllabizer regex `/[^aeiouy]*[aeiouy]+(?:[^aeiouy](?![aeiouy]))*/gi` as-is
 - **Why**: Validated in Gemini Canvas prototyping. Handles most English words correctly.
