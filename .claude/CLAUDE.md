@@ -23,7 +23,7 @@ npm run preview      # Preview production build
 ```
 
 ## Critical Rules
-- Deluge export MUST produce slice counts in multiples of 8 (8, 16, 32, 64)
+- Deluge accepts any slice count from 2–256 — no rounding needed
 - All slices in exported WAV MUST be uniform length (padded to longest)
 - SAM pitch formula: `SAM_Pitch = 22050 / Frequency_Hz` — do not change this math
 - Never commit .env files or API keys

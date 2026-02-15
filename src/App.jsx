@@ -38,10 +38,7 @@ const App = () => {
   const audioContextRef = useRef(null);
   const isPlayingRef = useRef(false);
 
-  // --- Deluge Calculation Logic ---
   const activeCount = syllables.length;
-  const targetSliceCount = Math.ceil(Math.max(activeCount, 1) / 8) * 8;
-  const paddingCount = targetSliceCount - activeCount;
 
   // --- Text Processing ---
 
@@ -256,22 +253,22 @@ const App = () => {
     const maxLen = Math.max(...renderedBuffers.map(b => b.length), 1);
     setMaxSliceDuration(maxLen / sampleRate);
 
-    // Build concatenated output: targetSliceCount slices, each maxLen samples
-    const totalSamples = targetSliceCount * maxLen;
+    // Build concatenated output: activeCount slices, each maxLen samples
+    const totalSamples = activeCount * maxLen;
     const output = new Float32Array(totalSamples);
 
     renderedBuffers.forEach((buf, i) => {
       output.set(buf, i * maxLen);
-      // Remaining samples in this slice are already 0 (silence padding)
     });
 
     const wavData = writeWavHeader(output, sampleRate);
     const blob = new Blob([wavData], { type: 'audio/wav' });
     const url = URL.createObjectURL(blob);
 
+    const prefix = inputText.trim().slice(0, 10).toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'bitvox';
     const link = document.createElement('a');
     link.href = url;
-    link.download = `bitvox_kit_${activeCount}syl_${targetSliceCount}pad.wav`;
+    link.download = `${prefix}_${activeCount}slices.wav`;
     link.click();
     URL.revokeObjectURL(url);
 
@@ -519,19 +516,6 @@ const App = () => {
             </div>
           ))}
 
-          {/* Padding Slices */}
-          {Array.from({ length: paddingCount }).map((_, i) => (
-            <div
-              key={`pad-${i}`}
-              className="flex flex-col items-center justify-center p-4 opacity-40"
-              style={{ border: '2px dashed var(--c64-border)', background: 'var(--c64-panel)' }}
-            >
-              <span className="text-[8px] font-bold tracking-widest mb-2" style={{ color: 'var(--c64-muted)' }}>
-                BLANK {padNum(activeCount + i + 1)}
-              </span>
-            </div>
-          ))}
-
           <button
             onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', phonetic: true, ...globalVoice }])}
             className="flex flex-col items-center justify-center gap-2 p-8"
@@ -549,13 +533,6 @@ const App = () => {
           <div className="flex flex-col">
             <span style={{ color: 'var(--c64-muted)' }}>ACTIVE SLICES</span>
             <span className="text-base font-bold" style={{ color: 'var(--c64-cyan)' }}>{activeCount}</span>
-          </div>
-
-          <span style={{ color: 'var(--c64-muted)' }}>&gt;</span>
-
-          <div className="flex flex-col">
-            <span style={{ color: 'var(--c64-muted)' }}>DELUGE TARGET</span>
-            <span className="text-base font-bold" style={{ color: 'var(--c64-green)' }}>{targetSliceCount} <span className="text-[8px]" style={{ color: 'var(--c64-muted)' }}>PADS</span></span>
           </div>
 
           <div className="hidden md:block" style={{ width: '1px', height: '24px', background: 'var(--c64-border)' }} />
