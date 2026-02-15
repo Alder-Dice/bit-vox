@@ -409,7 +409,7 @@ const App = () => {
           </svg>
         </div>
 
-        <div className="mt-6 flex flex-col md:flex-row gap-2 p-3" style={{ background: 'var(--c64-panel)', border: '2px solid var(--c64-border)' }}>
+        <div className="mt-6 flex flex-col md:flex-row md:items-center gap-2 p-3" style={{ background: 'var(--c64-panel)', border: '2px solid var(--c64-border)' }}>
           <div className="flex-1">
             <input
               type="text"
@@ -463,9 +463,9 @@ const App = () => {
             >
               <Download size={14} />
             </button>
-            <div className="ml-2 flex flex-col text-[8px] whitespace-nowrap tabular-nums leading-tight" style={{ color: 'var(--c64-muted)' }}>
+            <div className="ml-2 flex flex-col text-[8px] whitespace-nowrap tabular-nums" style={{ color: 'var(--c64-muted)', lineHeight: '1.6' }}>
               <span>{activeCount} SLICE{activeCount !== 1 ? 'S' : ''}</span>
-              <span>{maxSliceDuration !== null ? `${maxSliceDuration.toFixed(2)}S` : '\u2014'}</span>
+              {maxSliceDuration !== null && <span>{maxSliceDuration.toFixed(2)}S EACH</span>}
             </div>
           </div>
         </div>

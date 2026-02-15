@@ -40,9 +40,9 @@ VALIDATE: [First/last line expectations, e.g. "First line: export/class, Last ch
 
 ### Execution
 
-**Prerequisites**: Gemini CLI requires Node 20+. System Node is v18 — always load nvm first:
+**Prerequisites**: Gemini CLI requires Node 20+. System Node is v18 — **prefix every Bash tool call** that invokes `gemini` with the nvm loader (shell state doesn't persist between Bash calls):
 ```bash
-export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use 22
+export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use 22 && gemini "..."
 ```
 
 **Stdout contamination**: Gemini CLI prints startup logging to stdout (`[STARTUP] ...`, `Loaded cached credentials.`). When redirecting to a file, always **post-process** to strip non-content lines, or validate/clean the output before integration.
