@@ -14,10 +14,10 @@
 
 ## Active Rules
 
-### Deluge: Slice count must be a multiple of 8
-- **Rule**: `targetSliceCount = Math.ceil(count / 8) * 8` — never skip this.
-- **Why**: Deluge hardware expects 8/16/32/64 slices for automatic pad mapping. Wrong count = slices won't align to pads.
-- **Context**: `handleExport()` in App.jsx.
+### ~~Deluge: Slice count must be a multiple of 8~~ — DISPROVEN
+- **Rule**: Deluge accepts any slice count 2–256. No rounding needed.
+- **Why**: Hardware testing (Phase 4) confirmed arbitrary counts work fine.
+- **Context**: Padding logic was removed in Phase 4.
 
 ### Deluge: All slices must be uniform length
 - **Rule**: Pad every slice with silence to match the longest syllable's duration.

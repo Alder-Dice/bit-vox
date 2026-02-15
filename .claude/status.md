@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-02-15
+> Last updated: 2026-02-15 (Phase 5 complete)
 
 ---
 
@@ -48,18 +48,24 @@
 
 ---
 
+### Phase 5: Step-Sequencer Card UI ✅
+- [x] Replace VOICE slider panel with 5 mode cards (PH, PITCH, SPEED, MOUTH, THROAT)
+- [x] Two card modes: menu (phoneme editing) and step (draggable bar overlay)
+- [x] Cross-card drag — draw values across syllable cards in step mode
+- [x] Global offset drag with clamping — drag param card to shift all syllables uniformly
+- [x] Conditional UI — hide phoneme input/picker/play in step mode, keep delete
+- [x] CSS touch-action for mobile drag surfaces
+- Depends on: Phase 4
+
+---
+
 ## Current Focus
 
-**Phase 4: Testing & Deluge Validation**
+**Phase 5 complete.** Step-sequencer card UI implemented and user-tested.
 
-Core Deluge validation complete — hardware-tested, padding removed, filenames improved. Remaining: cross-browser and mobile testing.
-
-### Completed This Phase
-- Hardware test confirmed perfect slice alignment on Deluge
-- Removed multiples-of-8 padding constraint (unnecessary — Deluge accepts any count 2–256)
-- Export filenames derived from input text, fallback `bitvox`
-- Removed BLANK padding cards and DELUGE TARGET footer stat
-- Updated CLAUDE.md critical rules to reflect actual Deluge behavior
+### Next up
+- Cross-browser audio testing (from Phase 4 backlog)
+- Mobile responsiveness testing (from Phase 4 backlog)
 
 ### Blocked / Known Issues
 _(none)_
