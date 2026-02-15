@@ -5,10 +5,10 @@ import { SAM_PHONEMES, PHONEME_CATEGORIES } from './lib/sam-phonemes.js';
 
 const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
 const SAM_PARAMS = [
-  { field: 'pitch', label: 'PITCH', min: 1, max: 255 },
-  { field: 'speed', label: 'SPEED', min: 40, max: 200 },
-  { field: 'mouth', label: 'MOUTH', min: 0, max: 255 },
-  { field: 'throat', label: 'THROAT', min: 0, max: 255 },
+  { field: 'pitch', label: 'PITCH', min: 1, max: 255, color: 'var(--c64-yellow)' },
+  { field: 'speed', label: 'SPEED', min: 40, max: 200, color: 'var(--c64-orange)' },
+  { field: 'mouth', label: 'MOUTH', min: 0, max: 255, color: 'var(--c64-ltblue)' },
+  { field: 'throat', label: 'THROAT', min: 0, max: 255, color: 'var(--c64-purple)' },
 ];
 
 const MODE_CARDS = [
@@ -374,8 +374,6 @@ const App = () => {
 
   // --- Helpers ---
 
-  const padNum = (n) => `[${String(n).padStart(2, '0')}]`;
-
   const getBarRatio = (value, field) => {
     const param = SAM_PARAMS.find(p => p.field === field);
     if (!param) return 0;
@@ -390,36 +388,11 @@ const App = () => {
             <h1 className="text-xl font-bold tracking-wide" style={{ color: 'var(--c64-cyan)' }}>
               BIT-VOX DELUGE
             </h1>
-            <p className="text-[8px] mt-2 tracking-widest" style={{ color: 'var(--c64-muted)' }}>AUTO-SLICING SPEECH SEQUENCER</p>
+            <p className="text-[8px] mt-2 tracking-widest md:hidden" style={{ color: 'var(--c64-muted)' }}>AUTO-SLICING SPEECH SEQUENCER</p>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={handlePreview}
-              className="flex items-center gap-2 px-4 py-2 font-bold text-[10px]"
-              style={{
-                background: isPlaying ? 'var(--c64-red)' : 'var(--c64-panel)',
-                border: `2px solid ${isPlaying ? 'var(--c64-red)' : 'var(--c64-cyan)'}`,
-                color: isPlaying ? 'var(--c64-text)' : 'var(--c64-cyan)',
-              }}
-            >
-              {isPlaying ? <Square size={14} /> : <Play size={14} />}
-              {isPlaying ? 'STOP' : 'PREVIEW'}
-            </button>
-            <button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="flex items-center gap-2 px-4 py-2 font-bold text-[10px]"
-              style={{
-                background: isExporting ? 'var(--c64-panel)' : 'var(--c64-green)',
-                border: `2px solid ${isExporting ? 'var(--c64-muted)' : 'var(--c64-green)'}`,
-                color: isExporting ? 'var(--c64-muted)' : '#fff',
-                cursor: isExporting ? 'wait' : 'pointer',
-              }}
-            >
-              <Download size={14} />
-              {isExporting ? 'RENDERING...' : 'EXPORT KIT'}
-            </button>
+          <div className="hidden md:flex flex-col items-end">
+            <p className="text-[8px] tracking-widest" style={{ color: 'var(--c64-muted)' }}>AUTO-SLICING SPEECH SEQUENCER</p>
           </div>
         </div>
 
@@ -434,22 +407,54 @@ const App = () => {
               style={{
                 background: 'var(--c64-bg)',
                 border: '2px solid var(--c64-border)',
-                color: 'var(--c64-cyan)',
+                color: cardMode !== null ? SAM_PARAMS.find(p => p.field === cardMode)?.color || 'var(--c64-cyan)' : 'var(--c64-cyan)',
               }}
               onKeyDown={(e) => e.key === 'Enter' && convertTextToSyllables()}
             />
           </div>
-          <button
-            onClick={convertTextToSyllables}
-            className="flex items-center justify-center gap-2 px-6 py-2 text-[10px] font-bold"
-            style={{
-              background: 'var(--c64-panel)',
-              border: '2px solid var(--c64-cyan)',
-              color: 'var(--c64-cyan)',
-            }}
-          >
-            GENERATE
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={convertTextToSyllables}
+              className="flex items-center justify-center gap-2 px-6 py-2 text-[8px] font-bold"
+              style={{
+                background: 'var(--c64-panel)',
+                border: '2px solid var(--c64-border)',
+                color: cardMode !== null ? SAM_PARAMS.find(p => p.field === cardMode)?.color || 'var(--c64-cyan)' : 'var(--c64-cyan)',
+              }}
+            >
+              GENERATE
+            </button>
+            <button
+              onClick={handlePreview}
+              className="flex items-center justify-center aspect-square py-2 px-2"
+              style={{
+                background: 'var(--c64-panel)',
+                border: `2px solid ${isPlaying ? 'var(--c64-red)' : 'var(--c64-border)'}`,
+                color: isPlaying ? 'var(--c64-red)' : 'var(--c64-cyan)',
+              }}
+              title={isPlaying ? 'STOP' : 'PREVIEW'}
+            >
+              {isPlaying ? <Square size={14} /> : <Play size={14} />}
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center justify-center aspect-square py-2 px-2"
+              style={{
+                background: 'var(--c64-panel)',
+                border: `2px solid ${isExporting ? 'var(--c64-muted)' : 'var(--c64-border)'}`,
+                color: isExporting ? 'var(--c64-muted)' : 'var(--c64-cyan)',
+                cursor: isExporting ? 'wait' : 'pointer',
+              }}
+              title={isExporting ? 'RENDERING...' : 'EXPORT WAV'}
+            >
+              <Download size={14} />
+            </button>
+            <div className="ml-2 flex flex-col text-[8px] whitespace-nowrap tabular-nums leading-tight" style={{ color: 'var(--c64-muted)' }}>
+              <span>{activeCount} SLICE{activeCount !== 1 ? 'S' : ''}</span>
+              <span>{maxSliceDuration !== null ? `${maxSliceDuration.toFixed(2)}S` : '\u2014'}</span>
+            </div>
+          </div>
         </div>
 
         {/* Global Mode Cards */}
@@ -458,6 +463,7 @@ const App = () => {
             const isActive = cardMode === mc.field;
             const param = mc.field ? SAM_PARAMS.find(p => p.field === mc.field) : null;
             const ratio = param ? getBarRatio(globalVoice[mc.field], mc.field) : 0;
+            const activeColor = param ? param.color : 'var(--c64-cyan)';
 
             return (
               <div
@@ -465,7 +471,7 @@ const App = () => {
                 className="step-drag-surface relative flex flex-col items-center flex-1 p-2 cursor-pointer select-none"
                 style={{
                   background: 'var(--c64-panel)',
-                  border: `2px solid ${isActive ? 'var(--c64-cyan)' : 'var(--c64-border)'}`,
+                  border: `2px solid ${isActive ? activeColor : 'var(--c64-border)'}`,
                   minHeight: param ? '72px' : undefined,
                 }}
                 onClick={() => { if (mc.field === null || cardMode !== mc.field) activateMode(mc.field); }}
@@ -473,17 +479,17 @@ const App = () => {
                 onPointerMove={(e) => { if (mc.field) handleGlobalPointerMove(e, mc.field); }}
                 onPointerUp={(e) => { if (mc.field) handleGlobalPointerUp(e, mc.field); }}
               >
-                <span className="text-[8px] font-bold" style={{ color: isActive ? 'var(--c64-cyan)' : 'var(--c64-muted)', zIndex: 2, position: 'relative' }}>
+                <span className="text-[8px] font-bold" style={{ color: isActive ? activeColor : 'var(--c64-muted)', zIndex: 2, position: 'relative' }}>
                   {mc.label}
                 </span>
                 {param && (
                   <div className="absolute bottom-0 left-0 right-0" style={{ height: `${ratio * 100}%`, pointerEvents: 'none' }}>
-                    <div style={{ height: '2px', background: 'rgba(255,255,255,0.4)' }} />
-                    <div className="w-full" style={{ height: 'calc(100% - 2px)', background: 'rgba(255,255,255,0.08)' }} />
+                    <div style={{ height: '2px', background: isActive ? activeColor : 'rgba(255,255,255,0.4)' }} />
+                    <div className="w-full" style={{ height: 'calc(100% - 2px)', background: isActive ? activeColor : 'rgba(255,255,255,0.08)', opacity: isActive ? 0.15 : 1 }} />
                   </div>
                 )}
                 {param && (
-                  <span className="text-[7px] mt-auto pt-1" style={{ color: 'var(--c64-muted)', zIndex: 2, position: 'relative' }}>
+                  <span className="text-[7px] mt-auto pt-1" style={{ color: isActive ? activeColor : 'var(--c64-muted)', zIndex: 2, position: 'relative' }}>
                     {globalVoice[mc.field]}
                   </span>
                 )}
@@ -493,12 +499,13 @@ const App = () => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto w-full flex-1 pb-40">
+      <main className="max-w-6xl mx-auto w-full flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {syllables.map((syl, sIdx) => {
             const inStepMode = cardMode !== null;
             const stepParam = inStepMode ? SAM_PARAMS.find(p => p.field === cardMode) : null;
             const stepRatio = stepParam ? getBarRatio(syl[cardMode], cardMode) : 0;
+            const stepColor = stepParam ? stepParam.color : null;
 
             return (
               <div
@@ -520,9 +527,6 @@ const App = () => {
                 {/* Header — always visible, above overlay */}
                 <div className="relative flex justify-between items-start mb-3" style={{ zIndex: 2 }}>
                   <div className="flex items-center gap-2">
-                    <span className="text-[8px] font-bold px-2 py-0.5" style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}>
-                      {padNum(sIdx + 1)}
-                    </span>
                     {renderErrors[syl.id] && (
                       <AlertTriangle size={10} style={{ color: 'var(--c64-red)' }} />
                     )}
@@ -625,12 +629,12 @@ const App = () => {
                   >
                     {/* Bar fill from bottom */}
                     <div className="absolute bottom-0 left-0 right-0" style={{ height: `${stepRatio * 100}%`, pointerEvents: 'none' }}>
-                      <div style={{ height: '2px', background: 'rgba(255,255,255,0.4)' }} />
-                      <div className="w-full" style={{ height: 'calc(100% - 2px)', background: 'rgba(255,255,255,0.08)' }} />
+                      <div style={{ height: '2px', background: stepColor }} />
+                      <div className="w-full" style={{ height: 'calc(100% - 2px)', background: stepColor, opacity: 0.15 }} />
                     </div>
                     {/* Value label */}
                     <div className="absolute inset-0 flex items-center justify-center" style={{ pointerEvents: 'none' }}>
-                      <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      <span className="text-lg font-bold" style={{ color: stepColor, opacity: 0.4 }}>
                         {syl[cardMode]}
                       </span>
                     </div>
@@ -651,24 +655,6 @@ const App = () => {
         </div>
       </main>
 
-      {/* Stats Footer */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 z-50" style={{ background: 'var(--c64-panel)', borderTop: '2px solid var(--c64-border)' }}>
-        <div className="max-w-6xl mx-auto flex items-center gap-6 text-[8px]">
-          <div className="flex flex-col">
-            <span style={{ color: 'var(--c64-muted)' }}>ACTIVE SLICES</span>
-            <span className="text-base font-bold" style={{ color: 'var(--c64-cyan)' }}>{activeCount}</span>
-          </div>
-
-          <div className="hidden md:block" style={{ width: '1px', height: '24px', background: 'var(--c64-border)' }} />
-
-          <div className="hidden md:flex flex-col">
-            <span style={{ color: 'var(--c64-muted)' }}>UNIFORM SLICE LEN</span>
-            <span className="text-base font-bold" style={{ color: 'var(--c64-text)' }}>
-              {maxSliceDuration !== null ? `${maxSliceDuration.toFixed(2)}S` : '\u2014'}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

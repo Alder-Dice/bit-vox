@@ -8,8 +8,11 @@
   --c64-cyan: #FFFFFF;
   --c64-red: #959595;
   --c64-green: #B8B8B8;
-  --c64-yellow: #B8B8B8;
   --c64-muted: #B8B8B8;
+  --c64-yellow: #E8D864;
+  --c64-orange: #D07820;
+  --c64-ltblue: #6C9EB2;
+  --c64-purple: #8838B8;
 }
 
 body {
