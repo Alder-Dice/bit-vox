@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { Play, Square, Download, Plus, Trash2, Volume2, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
-import { renderSyllable, samplesToAudioBuffer } from './lib/sam.js';
+import { Play, Square, Download, Plus, Trash2, Volume2, AlertTriangle, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { renderSyllable, samplesToAudioBuffer, convertToPhonemes } from './lib/sam.js';
+import { SAM_PHONEMES, PHONEME_CATEGORIES } from './lib/sam-phonemes.js';
 
 const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
 const SAM_PARAMS = [
@@ -13,11 +14,17 @@ const SAM_PARAMS = [
 const App = () => {
   const [inputText, setInputText] = useState("");
   const [globalVoice, setGlobalVoice] = useState({ ...SAM_DEFAULTS });
-  const [syllables, setSyllables] = useState([
-    { id: 1, text: 'SAT', ...SAM_DEFAULTS },
-    { id: 2, text: 'UR', ...SAM_DEFAULTS },
-    { id: 3, text: 'DAY', ...SAM_DEFAULTS },
-  ]);
+  const [syllables, setSyllables] = useState(() => {
+    return ['SAT', 'UR', 'DAY'].map((chunk, i) => {
+      const phonemes = convertToPhonemes(chunk);
+      return {
+        id: i + 1,
+        text: phonemes || chunk.toUpperCase(),
+        phonetic: phonemes !== false,
+        ...SAM_DEFAULTS,
+      };
+    });
+  });
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSyllableIdx, setCurrentSyllableIdx] = useState(-1);
@@ -25,6 +32,8 @@ const App = () => {
   const [renderErrors, setRenderErrors] = useState({});
   const [maxSliceDuration, setMaxSliceDuration] = useState(null);
   const [expandedCards, setExpandedCards] = useState({});
+  const [pickerOpenFor, setPickerOpenFor] = useState(null);
+  const inputRefs = useRef({});
 
   const audioContextRef = useRef(null);
   const isPlayingRef = useRef(false);
@@ -46,23 +55,38 @@ const App = () => {
   const convertTextToSyllables = () => {
     const words = inputText.trim().split(/\s+/);
     let newSyllables = [];
+    const errors = {};
 
     words.forEach(word => {
       if (!word) return;
       const chunks = autoSyllabize(word);
       chunks.forEach(chunk => {
-        newSyllables.push({
-          id: Math.random(),
-          text: chunk.toUpperCase(),
-          ...globalVoice,
-        });
+        const phonemes = convertToPhonemes(chunk);
+        const id = Math.random();
+        if (phonemes === false) {
+          errors[id] = true;
+          newSyllables.push({
+            id,
+            text: chunk.toUpperCase(),
+            phonetic: false,
+            ...globalVoice,
+          });
+        } else {
+          newSyllables.push({
+            id,
+            text: phonemes,
+            phonetic: true,
+            ...globalVoice,
+          });
+        }
       });
     });
 
     if (newSyllables.length > 0) {
       setSyllables(newSyllables);
-      setRenderErrors({});
+      setRenderErrors(errors);
       setMaxSliceDuration(null);
+      setPickerOpenFor(null);
     }
   };
 
@@ -79,6 +103,25 @@ const App = () => {
 
   const toggleCardExpanded = (id) => {
     setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const insertPhoneme = (syllableId, phonemeCode) => {
+    const el = inputRefs.current[syllableId];
+    const syl = syllables.find(s => s.id === syllableId);
+    if (!syl) return;
+
+    const cursorPos = el ? el.selectionStart ?? syl.text.length : syl.text.length;
+    const before = syl.text.slice(0, cursorPos);
+    const after = syl.text.slice(cursorPos);
+    const newText = before + phonemeCode + after;
+
+    updateSyllable(syllableId, 'text', newText);
+
+    // Restore cursor after React re-render
+    const newPos = cursorPos + phonemeCode.length;
+    requestAnimationFrame(() => {
+      if (el) { el.focus(); el.setSelectionRange(newPos, newPos); }
+    });
   };
 
   // --- Audio Helpers ---
@@ -376,19 +419,69 @@ const App = () => {
                 </button>
               </div>
 
-              {/* Text Input */}
-              <input
-                type="text"
-                value={syl.text}
-                onChange={(e) => updateSyllable(syl.id, 'text', e.target.value.toUpperCase())}
-                placeholder="TEXT..."
-                className="w-full px-3 py-2 text-[10px] font-bold focus:outline-none mb-3"
-                style={{
-                  background: 'var(--c64-bg)',
-                  border: `2px solid ${renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-border)'}`,
-                  color: renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-cyan)',
-                }}
-              />
+              {/* Phoneme Input */}
+              <div className="flex gap-1 mb-3">
+                <input
+                  ref={(el) => { inputRefs.current[syl.id] = el; }}
+                  type="text"
+                  value={syl.text}
+                  onChange={(e) => updateSyllable(syl.id, 'text', e.target.value.toUpperCase())}
+                  placeholder="PHONEMES..."
+                  className="flex-1 min-w-0 px-3 py-2 text-[10px] font-bold focus:outline-none"
+                  style={{
+                    background: 'var(--c64-bg)',
+                    border: `2px solid ${renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-border)'}`,
+                    color: renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-cyan)',
+                  }}
+                />
+                <button
+                  onClick={() => setPickerOpenFor(pickerOpenFor === syl.id ? null : syl.id)}
+                  className="px-2 py-1 text-[8px] font-bold shrink-0"
+                  style={{
+                    background: pickerOpenFor === syl.id ? 'var(--c64-cyan)' : 'var(--c64-bg)',
+                    border: '2px solid var(--c64-border)',
+                    color: pickerOpenFor === syl.id ? 'var(--c64-bg)' : 'var(--c64-muted)',
+                  }}
+                >
+                  PH
+                </button>
+              </div>
+
+              {/* Phoneme Picker */}
+              {pickerOpenFor === syl.id && (
+                <div className="mb-3 p-2 max-h-48 overflow-y-auto" style={{ background: 'var(--c64-bg)', border: '2px solid var(--c64-border)' }}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[7px] font-bold tracking-widest" style={{ color: 'var(--c64-muted)' }}>PHONEME PICKER</span>
+                    <button onClick={() => setPickerOpenFor(null)} style={{ color: 'var(--c64-muted)' }}><X size={10} /></button>
+                  </div>
+                  {PHONEME_CATEGORIES.map(cat => {
+                    const phonemes = SAM_PHONEMES.filter(p => p.category === cat);
+                    if (phonemes.length === 0) return null;
+                    return (
+                      <div key={cat} className="mb-2">
+                        <div className="text-[6px] font-bold mb-1 tracking-widest" style={{ color: 'var(--c64-muted)' }}>{cat.toUpperCase()}</div>
+                        <div className="flex flex-wrap gap-1">
+                          {phonemes.map(p => (
+                            <button
+                              key={p.code}
+                              onClick={() => insertPhoneme(syl.id, p.code)}
+                              title={p.example}
+                              className="px-1.5 py-0.5 text-[8px] font-bold"
+                              style={{
+                                background: 'var(--c64-panel)',
+                                border: '1px solid var(--c64-border)',
+                                color: 'var(--c64-cyan)',
+                              }}
+                            >
+                              {p.code}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Per-syllable overrides (collapsed by default) */}
               {expandedCards[syl.id] && (
@@ -440,7 +533,7 @@ const App = () => {
           ))}
 
           <button
-            onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', ...globalVoice }])}
+            onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', phonetic: true, ...globalVoice }])}
             className="flex flex-col items-center justify-center gap-2 p-8"
             style={{ border: '2px dashed var(--c64-border)', color: 'var(--c64-muted)', background: 'transparent' }}
           >

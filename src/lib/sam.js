@@ -28,11 +28,24 @@ export function renderSyllable(syllable) {
   });
 
   try {
-    const raw = sam.buf32(syllable.text);
+    const raw = sam.buf32(syllable.text, !!syllable.phonetic);
     if (raw === false) return null;
     return upsample2x(raw);
   } catch {
     return null;
+  }
+}
+
+/**
+ * Convert English text to SAM phoneme notation.
+ * Returns the phoneme string, or false if conversion fails.
+ */
+export function convertToPhonemes(text) {
+  try {
+    const result = SamJs.convert(text);
+    return result || false;
+  } catch {
+    return false;
   }
 }
 
