@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-02-15 (Phase 5 complete)
+> Last updated: 2026-02-15 (Phase 6 in progress)
 
 ---
 
@@ -59,13 +59,26 @@
 
 ---
 
+### Phase 6: UI Polish & Branding (In Progress)
+- [x] Compact header controls — preview/export as icon buttons in generate row
+- [x] Per-parameter colors (yellow, orange, ltblue, purple) for mode cards and step bars
+- [x] Color-reactive input text and generate button
+- [x] Remove card number badges
+- [x] Remove fixed stats footer — inline slice info next to controls
+- [x] SVG graffiti header banner (Gemini-generated, replaces h1)
+- [ ] Refine header SVG with Gemini — iterate on letter style, fill space better [Gemini]
+- [ ] Cross-browser audio testing (from Phase 4 backlog)
+- [ ] Mobile responsiveness testing (from Phase 4 backlog)
+
+---
+
 ## Current Focus
 
-**Phase 5 complete.** Step-sequencer card UI implemented and user-tested.
+**Phase 6 in progress.** UI polish and branding. Header SVG integrated but needs refinement.
 
 ### Next up
-- Cross-browser audio testing (from Phase 4 backlog)
-- Mobile responsiveness testing (from Phase 4 backlog)
+- Iterate on header SVG with Gemini (letter style, graffiti energy, space filling)
+- Cross-browser / mobile testing
 
 ### Blocked / Known Issues
 _(none)_
