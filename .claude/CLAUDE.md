@@ -30,7 +30,17 @@ npm run preview      # Preview production build
 
 ## Delegation
 
-**During planning (including plan mode), decompose work to identify tasks for delegation.** Tag tasks in status.md with [Sonnet], [Gemini], or [Opus]. Also watch for ad-hoc opportunities during execution. All delegated tasks need well-specified inputs/outputs and verifiable results.
+**Default stance: delegate unless there's a reason not to.** Opus tokens are expensive. At every natural breakpoint — starting a subtask, about to generate code, about to read unfamiliar files — ask: *can something cheaper do this?*
+
+### Planning-time delegation
+Decompose work to identify tasks for delegation. Tag tasks in status.md with [Sonnet], [Gemini], or [Opus]. All delegated tasks need well-specified inputs/outputs and verifiable results.
+
+### Ad-hoc triggers — check at every breakpoint
+**Delegate when**: generating from scratch (Gemini) | reading 3+ unfamiliar files (Gemini) | mechanical/repetitive edits (Sonnet) | pattern-following work like tests (Sonnet) | subtask is self-contained and doesn't need your current context (either).
+
+**Rule of thumb**: if you can specify it in ~10 lines, delegate it — the prompt costs less than the work.
+
+### Who does what
 
 **Gemini CLI** (see `.claude/gemini.md` for prompt templates and execution):
 - *Generative*: small prompt → large output (components, algorithms, variations, boilerplate)
@@ -40,7 +50,7 @@ npm run preview      # Preview production build
 - Scoped, mechanical, pattern-available. Doing, not deciding.
 - Run independent tasks in parallel. Specify: file path, exact change, pattern to follow.
 
-**Keep on Opus**: architecture, trade-offs, novel design, cross-cutting judgment. Also any task where Opus already has context loaded and the work is small — don't over-delegate.
+**Keep on Opus**: architecture, trade-offs, novel design, cross-cutting judgment. Also small tasks where you already have full context loaded — don't pay delegation overhead for 30 seconds of work.
 
 ## Git Conventions
 
