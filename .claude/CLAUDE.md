@@ -36,9 +36,12 @@ npm run preview      # Preview production build
 Decompose work to identify tasks for delegation. Tag tasks in status.md with [Sonnet], [Gemini], or [Opus]. All delegated tasks need well-specified inputs/outputs and verifiable results.
 
 ### Ad-hoc triggers — check at every breakpoint
-**Delegate when**: generating from scratch (Gemini) | reading 3+ unfamiliar files (Gemini) | mechanical/repetitive edits (Sonnet) | pattern-following work like tests (Sonnet) | subtask is self-contained and doesn't need your current context (either).
+**Default: delegate.** Keep on Opus ONLY when:
+- You already have full context AND it's under ~3 edits
+- The task requires cross-cutting judgment (debugging, architecture, trade-offs)
+- Delegation prompt would be longer than the work itself
 
-**Rule of thumb**: if you can specify it in ~10 lines, delegate it — the prompt costs less than the work.
+The urge to "just do it quickly" is a delegation trigger, not an excuse to skip it.
 
 ### Who does what
 
@@ -50,7 +53,7 @@ Decompose work to identify tasks for delegation. Tag tasks in status.md with [So
 - Scoped, mechanical, pattern-available. Doing, not deciding.
 - Run independent tasks in parallel. Specify: file path, exact change, pattern to follow.
 
-**Keep on Opus**: architecture, trade-offs, novel design, cross-cutting judgment. Also small tasks where you already have full context loaded — don't pay delegation overhead for 30 seconds of work.
+**Keep on Opus**: architecture, trade-offs, novel design, cross-cutting judgment.
 
 ## Git Conventions
 
