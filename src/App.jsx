@@ -407,7 +407,6 @@ const App = () => {
               <path strokeWidth="1" d="M680,5 L690,5 L685,15 Z" />
             </g>
           </svg>
-          <p className="text-[8px] tracking-widest text-center md:text-left" style={{ color: 'var(--c64-muted)' }}>AUTO-SLICING SPEECH SEQUENCER</p>
         </div>
 
         <div className="mt-6 flex flex-col md:flex-row gap-2 p-3" style={{ background: 'var(--c64-panel)', border: '2px solid var(--c64-border)' }}>
@@ -646,10 +645,13 @@ const App = () => {
                       <div style={{ height: '2px', background: stepColor }} />
                       <div className="w-full" style={{ height: 'calc(100% - 2px)', background: stepColor, opacity: 0.15 }} />
                     </div>
-                    {/* Value label */}
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ pointerEvents: 'none' }}>
+                    {/* Value + phoneme labels */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1" style={{ pointerEvents: 'none' }}>
                       <span className="text-lg font-bold" style={{ color: stepColor, opacity: 0.4 }}>
                         {syl[cardMode]}
+                      </span>
+                      <span className="text-[8px] font-bold" style={{ color: stepColor, opacity: 0.4 }}>
+                        {syl.text}
                       </span>
                     </div>
                   </div>
