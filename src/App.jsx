@@ -650,7 +650,7 @@ const App = () => {
                       <span className="text-lg font-bold" style={{ color: stepColor, opacity: 0.4 }}>
                         {syl[cardMode]}
                       </span>
-                      <span className="text-[8px] font-bold" style={{ color: stepColor, opacity: 0.4 }}>
+                      <span className="text-lg font-bold" style={{ color: stepColor, opacity: 0.4 }}>
                         {syl.text}
                       </span>
                     </div>
