@@ -28,6 +28,20 @@ npm run preview      # Preview production build
 - SAM pitch formula: `SAM_Pitch = 22050 / Frequency_Hz` — do not change this math
 - Never commit .env files or API keys
 
+## Delegation
+
+**During planning (including plan mode), decompose work to identify tasks for delegation.** Tag tasks in status.md with [Sonnet], [Gemini], or [Opus]. Also watch for ad-hoc opportunities during execution. All delegated tasks need well-specified inputs/outputs and verifiable results.
+
+**Gemini CLI** (see `.claude/gemini.md` for prompt templates and execution):
+- *Generative*: small prompt → large output (components, algorithms, variations, boilerplate)
+- *Analytical*: codebase as context → focused output (audits, reviews, bug analysis, docs). Gemini reads files directly; keep the prompt short.
+
+**Sonnet subagents** (Task tool, model: sonnet):
+- Scoped, mechanical, pattern-available. Doing, not deciding.
+- Run independent tasks in parallel. Specify: file path, exact change, pattern to follow.
+
+**Keep on Opus**: architecture, trade-offs, novel design, cross-cutting judgment. Also any task where Opus already has context loaded and the work is small — don't over-delegate.
+
 ## Git Conventions
 
 **status.md phases = high-level tracking | Git = incremental code changes**
@@ -64,6 +78,7 @@ Example: `Phase 2: Add user authentication flow`
 | `/status` | Mid-session - quick status.md update |
 | `/lesson` | Capture a gotcha or pattern |
 | `/refresh` | After context compaction - reload all docs |
+| `/gemini` | Delegate a task to Gemini CLI |
 
 **User: Prompt me with these commands to keep documentation current.**
 
@@ -77,3 +92,4 @@ Example: `Phase 2: Add user authentication flow`
 | Gotchas & patterns | `LESSONS.md` | When you learn something |
 | System design | `architecture.md` | When design changes |
 | Commit history | `git log` | Never duplicate elsewhere |
+| Gemini delegation | `gemini.md` | When delegation patterns change |

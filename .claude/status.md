@@ -29,10 +29,11 @@
 - Depends on: Phase 1
 
 ### Phase 3: Refactor App.jsx ⏳
-- [ ] Extract audio engine into separate module
-- [ ] Extract Deluge export logic into separate module
-- [ ] Extract syllable card component
-- [ ] Clean up state management
+- [ ] Analyse extraction boundaries in App.jsx [Gemini]
+- [ ] Extract audio engine into separate module [Sonnet]
+- [ ] Extract Deluge export logic into separate module [Sonnet]
+- [ ] Extract syllable card component [Sonnet]
+- [ ] Clean up state management [Opus]
 - Depends on: Phase 2
 
 ### Phase 4: UI Polish & Features ⏳
@@ -66,9 +67,7 @@ Working on: SAM integration complete. C64 UI overhaul complete (greyscale palett
 - [x] Removed "Deluge Ready" footer box, kept stats row
 
 ### Blocked / Known Issues
-1. **Node.js version**: System has Node 18.19.1, Vite 7.x wants 20.19+. Builds work but shows warning.
-   - Impact: Warning only, no functional issue yet
-   - Next step: Consider upgrading Node or pinning Vite version
+1. ~~**Node.js version**: Resolved — Node 22 installed via nvm (2026-02-15)~~
 
 ---
 
