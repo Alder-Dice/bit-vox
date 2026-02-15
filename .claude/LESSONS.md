@@ -34,6 +34,11 @@
 - **Why**: Tailwind v4 dropped the PostCSS-based setup. The Vite plugin approach is simpler and faster.
 - **Context**: `vite.config.js`, `src/index.css`.
 
+### Gemini CLI: Requires nvm and stdout cleanup
+- **Rule**: Load nvm + Node 22 before invoking `gemini`. Output file will contain startup logging lines — strip them before integration.
+- **Why**: System Node is v18; Gemini CLI needs v20+ for regex `v` flag. Stdout includes `[STARTUP]` and credential lines.
+- **Context**: See `gemini.md` execution section for the nvm one-liner and cleanup notes.
+
 ### Prototype: autoSyllabize regex is solid
 - **Rule**: Keep the syllabizer regex `/[^aeiouy]*[aeiouy]+(?:[^aeiouy](?![aeiouy]))*/gi` as-is.
 - **Why**: Validated in Gemini Canvas prototyping. Handles most English words correctly.
