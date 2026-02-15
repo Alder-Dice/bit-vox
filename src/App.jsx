@@ -12,7 +12,7 @@ const SAM_PARAMS = [
 ];
 
 const MODE_CARDS = [
-  { field: null, label: 'PH' },
+  { field: null, label: 'PHONEME' },
   ...SAM_PARAMS.map(p => ({ field: p.field, label: p.label })),
 ];
 
