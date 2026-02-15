@@ -67,3 +67,8 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 0;
   cursor: pointer;
 }
+
+/* Prevent scroll interference on drag surfaces */
+.step-drag-surface {
+  touch-action: none;
+}

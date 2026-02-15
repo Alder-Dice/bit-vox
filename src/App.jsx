@@ -1,14 +1,19 @@
-import { useState, useRef } from 'react';
-import { Play, Square, Download, Plus, Trash2, Volume2, AlertTriangle, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Play, Square, Download, Plus, Trash2, Volume2, AlertTriangle, X } from 'lucide-react';
 import { renderSyllable, samplesToAudioBuffer, convertToPhonemes } from './lib/sam.js';
 import { SAM_PHONEMES, PHONEME_CATEGORIES } from './lib/sam-phonemes.js';
 
 const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
 const SAM_PARAMS = [
-  { field: 'pitch', label: 'Pitch', min: 1, max: 255 },
-  { field: 'speed', label: 'Speed', min: 40, max: 200 },
-  { field: 'mouth', label: 'Mouth', min: 0, max: 255 },
-  { field: 'throat', label: 'Throat', min: 0, max: 255 },
+  { field: 'pitch', label: 'PITCH', min: 1, max: 255 },
+  { field: 'speed', label: 'SPEED', min: 40, max: 200 },
+  { field: 'mouth', label: 'MOUTH', min: 0, max: 255 },
+  { field: 'throat', label: 'THROAT', min: 0, max: 255 },
+];
+
+const MODE_CARDS = [
+  { field: null, label: 'PH' },
+  ...SAM_PARAMS.map(p => ({ field: p.field, label: p.label })),
 ];
 
 const App = () => {
@@ -31,14 +36,121 @@ const App = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [renderErrors, setRenderErrors] = useState({});
   const [maxSliceDuration, setMaxSliceDuration] = useState(null);
-  const [expandedCards, setExpandedCards] = useState({});
+  const [cardMode, setCardMode] = useState(null);
   const [pickerOpenFor, setPickerOpenFor] = useState(null);
   const inputRefs = useRef({});
+  const cardRefs = useRef({});
+  const dragRef = useRef({ active: false, field: null });
+  const globalDragRef = useRef({ active: false, field: null, startY: null, startGlobalVal: null, startSyllables: null });
 
   const audioContextRef = useRef(null);
   const isPlayingRef = useRef(false);
 
   const activeCount = syllables.length;
+
+  // --- Mode switching ---
+
+  const activateMode = (mode) => {
+    setCardMode(mode);
+    setPickerOpenFor(null);
+  };
+
+  // --- Cross-card drag (syllable cards in step mode) ---
+
+  useEffect(() => {
+    if (cardMode === null) return;
+
+    const handlePointerMove = (e) => {
+      if (!dragRef.current.active) return;
+      const field = dragRef.current.field;
+      const param = SAM_PARAMS.find(p => p.field === field);
+      if (!param) return;
+
+      for (const [idStr, el] of Object.entries(cardRefs.current)) {
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+          const ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+          const value = Math.round(param.min + ratio * (param.max - param.min));
+          const id = Number(idStr);
+          setSyllables(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+          break;
+        }
+      }
+    };
+
+    const handlePointerUp = () => {
+      dragRef.current.active = false;
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [cardMode]);
+
+  const handleCardPointerDown = (e, sylId) => {
+    const field = cardMode;
+    const param = SAM_PARAMS.find(p => p.field === field);
+    if (!param) return;
+    e.preventDefault();
+    dragRef.current = { active: true, field };
+
+    const el = cardRefs.current[sylId];
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+      const value = Math.round(param.min + ratio * (param.max - param.min));
+      setSyllables(prev => prev.map(s => s.id === sylId ? { ...s, [field]: value } : s));
+    }
+  };
+
+  // --- Global offset drag (mode cards) ---
+
+  const handleGlobalPointerDown = (e, field) => {
+    const param = SAM_PARAMS.find(p => p.field === field);
+    if (!param) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    globalDragRef.current = {
+      active: true,
+      field,
+      startY: e.clientY,
+      startGlobalVal: globalVoice[field],
+      startSyllables: syllables.map(s => ({ ...s })),
+    };
+  };
+
+  const handleGlobalPointerMove = (e, field) => {
+    const ref = globalDragRef.current;
+    if (!ref.active || ref.field !== field) return;
+    const param = SAM_PARAMS.find(p => p.field === field);
+    if (!param) return;
+
+    const pixelDelta = ref.startY - e.clientY;
+    let delta = Math.round(pixelDelta * (param.max - param.min) / 200);
+
+    for (const syl of ref.startSyllables) {
+      delta = Math.min(delta, param.max - syl[field]);
+      delta = Math.max(delta, param.min - syl[field]);
+    }
+
+    const newGlobal = Math.max(param.min, Math.min(param.max, ref.startGlobalVal + delta));
+    setGlobalVoice(prev => ({ ...prev, [field]: newGlobal }));
+    setSyllables(ref.startSyllables.map(syl => ({
+      ...syl,
+      [field]: syl[field] + delta,
+    })));
+  };
+
+  const handleGlobalPointerUp = (e, field) => {
+    const ref = globalDragRef.current;
+    if (ref.active && ref.field === field) {
+      globalDragRef.current = { active: false, field: null, startY: null, startGlobalVal: null, startSyllables: null };
+    }
+  };
 
   // --- Text Processing ---
 
@@ -92,16 +204,6 @@ const App = () => {
     setRenderErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
   };
 
-  const updateGlobalVoice = (field, value) => {
-    setGlobalVoice(prev => ({ ...prev, [field]: value }));
-    setSyllables(prev => prev.map(s => ({ ...s, [field]: value })));
-    setRenderErrors({});
-  };
-
-  const toggleCardExpanded = (id) => {
-    setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
   const insertPhoneme = (syllableId, phonemeCode) => {
     const el = inputRefs.current[syllableId];
     const syl = syllables.find(s => s.id === syllableId);
@@ -114,7 +216,6 @@ const App = () => {
 
     updateSyllable(syllableId, 'text', newText);
 
-    // Restore cursor after React re-render
     const newPos = cursorPos + phonemeCode.length;
     requestAnimationFrame(() => {
       if (el) { el.focus(); el.setSelectionRange(newPos, newPos); }
@@ -182,7 +283,6 @@ const App = () => {
       source.connect(ctx.destination);
       source.start();
 
-      // Wait for playback to finish + small gap
       await new Promise(r => setTimeout(r, (samples.length / 44100) * 1000 + 50));
     }
 
@@ -235,7 +335,6 @@ const App = () => {
     const sampleRate = 44100;
     const errors = {};
 
-    // Render all syllables to raw buffers
     const renderedBuffers = syllables.map(syl => {
       const samples = renderSyllable(syl);
       if (!samples) {
@@ -249,11 +348,9 @@ const App = () => {
       setRenderErrors(prev => ({ ...prev, ...errors }));
     }
 
-    // Find longest buffer for uniform slice length
     const maxLen = Math.max(...renderedBuffers.map(b => b.length), 1);
     setMaxSliceDuration(maxLen / sampleRate);
 
-    // Build concatenated output: activeCount slices, each maxLen samples
     const totalSamples = activeCount * maxLen;
     const output = new Float32Array(totalSamples);
 
@@ -275,21 +372,15 @@ const App = () => {
     setIsExporting(false);
   };
 
-  // --- Pad number formatter ---
+  // --- Helpers ---
+
   const padNum = (n) => `[${String(n).padStart(2, '0')}]`;
 
-  // --- Slider helper ---
-  const SliderRow = ({ label, value, min, max, onChange }) => (
-    <div className="flex items-center gap-2">
-      <span className="text-[8px] w-12 shrink-0" style={{ color: 'var(--c64-muted)' }}>{label}</span>
-      <input
-        type="range" min={min} max={max} step="1" value={value}
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        className="flex-1 h-1 cursor-pointer"
-      />
-      <span className="text-[8px] font-bold w-7 text-right" style={{ color: 'var(--c64-cyan)' }}>{value}</span>
-    </div>
-  );
+  const getBarRatio = (value, field) => {
+    const param = SAM_PARAMS.find(p => p.field === field);
+    if (!param) return 0;
+    return (value - param.min) / (param.max - param.min);
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col" style={{ background: 'var(--c64-bg)', color: 'var(--c64-text)' }}>
@@ -361,160 +452,193 @@ const App = () => {
           </button>
         </div>
 
-        {/* Global Voice Controls */}
-        <div className="mt-4 p-4" style={{ background: 'var(--c64-panel)', border: '2px solid var(--c64-border)' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[8px] font-bold tracking-widest" style={{ color: 'var(--c64-muted)' }}>VOICE</span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
-            {SAM_PARAMS.map(p => (
-              <SliderRow
-                key={p.field}
-                label={p.label}
-                value={globalVoice[p.field]}
-                min={p.min}
-                max={p.max}
-                onChange={(v) => updateGlobalVoice(p.field, v)}
-              />
-            ))}
-          </div>
+        {/* Global Mode Cards */}
+        <div className="mt-4 flex gap-2">
+          {MODE_CARDS.map(mc => {
+            const isActive = cardMode === mc.field;
+            const param = mc.field ? SAM_PARAMS.find(p => p.field === mc.field) : null;
+            const ratio = param ? getBarRatio(globalVoice[mc.field], mc.field) : 0;
+
+            return (
+              <div
+                key={mc.label}
+                className="step-drag-surface relative flex flex-col items-center flex-1 p-2 cursor-pointer select-none"
+                style={{
+                  background: 'var(--c64-panel)',
+                  border: `2px solid ${isActive ? 'var(--c64-cyan)' : 'var(--c64-border)'}`,
+                  minHeight: param ? '72px' : undefined,
+                }}
+                onClick={() => { if (mc.field === null || cardMode !== mc.field) activateMode(mc.field); }}
+                onPointerDown={(e) => { if (mc.field && cardMode === mc.field) handleGlobalPointerDown(e, mc.field); }}
+                onPointerMove={(e) => { if (mc.field) handleGlobalPointerMove(e, mc.field); }}
+                onPointerUp={(e) => { if (mc.field) handleGlobalPointerUp(e, mc.field); }}
+              >
+                <span className="text-[8px] font-bold" style={{ color: isActive ? 'var(--c64-cyan)' : 'var(--c64-muted)', zIndex: 2, position: 'relative' }}>
+                  {mc.label}
+                </span>
+                {param && (
+                  <div className="absolute bottom-0 left-0 right-0" style={{ height: `${ratio * 100}%`, pointerEvents: 'none' }}>
+                    <div style={{ height: '2px', background: 'rgba(255,255,255,0.4)' }} />
+                    <div className="w-full" style={{ height: 'calc(100% - 2px)', background: 'rgba(255,255,255,0.08)' }} />
+                  </div>
+                )}
+                {param && (
+                  <span className="text-[7px] mt-auto pt-1" style={{ color: 'var(--c64-muted)', zIndex: 2, position: 'relative' }}>
+                    {globalVoice[mc.field]}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto w-full flex-1 pb-40">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {syllables.map((syl, sIdx) => (
-            <div
-              key={syl.id}
-              className="relative flex flex-col p-4 group"
-              style={{
-                background: 'var(--c64-panel)',
-                border: `2px solid ${
-                  renderErrors[syl.id]
-                    ? 'var(--c64-red)'
-                    : currentSyllableIdx === sIdx
-                      ? 'var(--c64-cyan)'
-                      : 'var(--c64-border)'
-                }`,
-              }}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-[8px] font-bold px-2 py-0.5" style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}>
-                    {padNum(sIdx + 1)}
-                  </span>
-                  {renderErrors[syl.id] && (
-                    <AlertTriangle size={10} style={{ color: 'var(--c64-red)' }} />
-                  )}
-                </div>
-                <button
-                  onClick={() => setSyllables(syllables.filter(s => s.id !== syl.id))}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ color: 'var(--c64-muted)' }}
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
+          {syllables.map((syl, sIdx) => {
+            const inStepMode = cardMode !== null;
+            const stepParam = inStepMode ? SAM_PARAMS.find(p => p.field === cardMode) : null;
+            const stepRatio = stepParam ? getBarRatio(syl[cardMode], cardMode) : 0;
 
-              {/* Phoneme Input */}
-              <div className="flex gap-1 mb-3">
-                <input
-                  ref={(el) => { inputRefs.current[syl.id] = el; }}
-                  type="text"
-                  value={syl.text}
-                  onChange={(e) => updateSyllable(syl.id, 'text', e.target.value.toUpperCase())}
-                  placeholder="PHONEMES..."
-                  className="flex-1 min-w-0 px-3 py-2 text-[10px] font-bold focus:outline-none"
-                  style={{
-                    background: 'var(--c64-bg)',
-                    border: `2px solid ${renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-border)'}`,
-                    color: renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-cyan)',
-                  }}
-                />
-                <button
-                  onClick={() => setPickerOpenFor(pickerOpenFor === syl.id ? null : syl.id)}
-                  className="px-2 py-1 text-[8px] font-bold shrink-0"
-                  style={{
-                    background: pickerOpenFor === syl.id ? 'var(--c64-cyan)' : 'var(--c64-bg)',
-                    border: '2px solid var(--c64-border)',
-                    color: pickerOpenFor === syl.id ? 'var(--c64-bg)' : 'var(--c64-muted)',
-                  }}
-                >
-                  PH
-                </button>
-              </div>
-
-              {/* Phoneme Picker */}
-              {pickerOpenFor === syl.id && (
-                <div className="mb-3 p-2 max-h-48 overflow-y-auto" style={{ background: 'var(--c64-bg)', border: '2px solid var(--c64-border)' }}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-[7px] font-bold tracking-widest" style={{ color: 'var(--c64-muted)' }}>PHONEME PICKER</span>
-                    <button onClick={() => setPickerOpenFor(null)} style={{ color: 'var(--c64-muted)' }}><X size={10} /></button>
+            return (
+              <div
+                key={syl.id}
+                ref={(el) => { if (el) cardRefs.current[syl.id] = el; else delete cardRefs.current[syl.id]; }}
+                className="relative flex flex-col p-4 group"
+                style={{
+                  background: 'var(--c64-panel)',
+                  border: `2px solid ${
+                    renderErrors[syl.id]
+                      ? 'var(--c64-red)'
+                      : currentSyllableIdx === sIdx
+                        ? 'var(--c64-cyan)'
+                        : 'var(--c64-border)'
+                  }`,
+                  minHeight: inStepMode ? '140px' : undefined,
+                }}
+              >
+                {/* Header — always visible, above overlay */}
+                <div className="relative flex justify-between items-start mb-3" style={{ zIndex: 2 }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[8px] font-bold px-2 py-0.5" style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}>
+                      {padNum(sIdx + 1)}
+                    </span>
+                    {renderErrors[syl.id] && (
+                      <AlertTriangle size={10} style={{ color: 'var(--c64-red)' }} />
+                    )}
                   </div>
-                  {PHONEME_CATEGORIES.map(cat => {
-                    const phonemes = SAM_PHONEMES.filter(p => p.category === cat);
-                    if (phonemes.length === 0) return null;
-                    return (
-                      <div key={cat} className="mb-2">
-                        <div className="text-[6px] font-bold mb-1 tracking-widest" style={{ color: 'var(--c64-muted)' }}>{cat.toUpperCase()}</div>
-                        <div className="flex flex-wrap gap-1">
-                          {phonemes.map(p => (
-                            <button
-                              key={p.code}
-                              onClick={() => insertPhoneme(syl.id, p.code)}
-                              title={p.example}
-                              className="px-1.5 py-0.5 text-[8px] font-bold"
-                              style={{
-                                background: 'var(--c64-panel)',
-                                border: '1px solid var(--c64-border)',
-                                color: 'var(--c64-cyan)',
-                              }}
-                            >
-                              {p.code}
-                            </button>
-                          ))}
+                  <button
+                    onClick={() => setSyllables(syllables.filter(s => s.id !== syl.id))}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: 'var(--c64-muted)' }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+
+                {/* Menu mode content */}
+                {!inStepMode && (
+                  <>
+                    {/* Phoneme Input */}
+                    <div className="flex gap-1 mb-3">
+                      <input
+                        ref={(el) => { inputRefs.current[syl.id] = el; }}
+                        type="text"
+                        value={syl.text}
+                        onChange={(e) => updateSyllable(syl.id, 'text', e.target.value.toUpperCase())}
+                        placeholder="PHONEMES..."
+                        className="flex-1 min-w-0 px-3 py-2 text-[10px] font-bold focus:outline-none"
+                        style={{
+                          background: 'var(--c64-bg)',
+                          border: `2px solid ${renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-border)'}`,
+                          color: renderErrors[syl.id] ? 'var(--c64-red)' : 'var(--c64-cyan)',
+                        }}
+                      />
+                      <button
+                        onClick={() => setPickerOpenFor(pickerOpenFor === syl.id ? null : syl.id)}
+                        className="px-2 py-1 text-[8px] font-bold shrink-0"
+                        style={{
+                          background: pickerOpenFor === syl.id ? 'var(--c64-cyan)' : 'var(--c64-bg)',
+                          border: '2px solid var(--c64-border)',
+                          color: pickerOpenFor === syl.id ? 'var(--c64-bg)' : 'var(--c64-muted)',
+                        }}
+                      >
+                        PH
+                      </button>
+                    </div>
+
+                    {/* Phoneme Picker */}
+                    {pickerOpenFor === syl.id && (
+                      <div className="mb-3 p-2 max-h-48 overflow-y-auto" style={{ background: 'var(--c64-bg)', border: '2px solid var(--c64-border)' }}>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[7px] font-bold tracking-widest" style={{ color: 'var(--c64-muted)' }}>PHONEME PICKER</span>
+                          <button onClick={() => setPickerOpenFor(null)} style={{ color: 'var(--c64-muted)' }}><X size={10} /></button>
                         </div>
+                        {PHONEME_CATEGORIES.map(cat => {
+                          const phonemes = SAM_PHONEMES.filter(p => p.category === cat);
+                          if (phonemes.length === 0) return null;
+                          return (
+                            <div key={cat} className="mb-2">
+                              <div className="text-[6px] font-bold mb-1 tracking-widest" style={{ color: 'var(--c64-muted)' }}>{cat.toUpperCase()}</div>
+                              <div className="flex flex-wrap gap-1">
+                                {phonemes.map(p => (
+                                  <button
+                                    key={p.code}
+                                    onClick={() => insertPhoneme(syl.id, p.code)}
+                                    title={p.example}
+                                    className="px-1.5 py-0.5 text-[8px] font-bold"
+                                    style={{
+                                      background: 'var(--c64-panel)',
+                                      border: '1px solid var(--c64-border)',
+                                      color: 'var(--c64-cyan)',
+                                    }}
+                                  >
+                                    {p.code}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    )}
 
-              {/* Per-syllable overrides (collapsed by default) */}
-              {expandedCards[syl.id] && (
-                <div className="flex flex-col gap-1.5 mb-3 pt-2" style={{ borderTop: '1px solid var(--c64-border)' }}>
-                  {SAM_PARAMS.map(p => (
-                    <SliderRow
-                      key={p.field}
-                      label={p.label}
-                      value={syl[p.field]}
-                      min={p.min}
-                      max={p.max}
-                      onChange={(v) => updateSyllable(syl.id, p.field, v)}
-                    />
-                  ))}
-                </div>
-              )}
+                    {/* Play button */}
+                    <div className="mt-auto flex items-center justify-end">
+                      <button
+                        onClick={() => playSingleSyllable(syl)}
+                        className="p-1.5"
+                        style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}
+                      >
+                        <Volume2 size={12} />
+                      </button>
+                    </div>
+                  </>
+                )}
 
-              <div className="mt-auto flex items-center justify-between">
-                <button
-                  onClick={() => toggleCardExpanded(syl.id)}
-                  className="flex items-center gap-1 text-[8px]"
-                  style={{ color: 'var(--c64-muted)' }}
-                >
-                  {expandedCards[syl.id] ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-                  {expandedCards[syl.id] ? 'HIDE' : 'VOICE'}
-                </button>
-                <button
-                  onClick={() => playSingleSyllable(syl)}
-                  className="p-1.5"
-                  style={{ background: 'var(--c64-bg)', border: '1px solid var(--c64-border)', color: 'var(--c64-cyan)' }}
-                >
-                  <Volume2 size={12} />
-                </button>
+                {/* Step mode overlay */}
+                {inStepMode && (
+                  <div
+                    className="step-drag-surface absolute inset-0"
+                    style={{ zIndex: 1, cursor: 'crosshair' }}
+                    onPointerDown={(e) => handleCardPointerDown(e, syl.id)}
+                  >
+                    {/* Bar fill from bottom */}
+                    <div className="absolute bottom-0 left-0 right-0" style={{ height: `${stepRatio * 100}%`, pointerEvents: 'none' }}>
+                      <div style={{ height: '2px', background: 'rgba(255,255,255,0.4)' }} />
+                      <div className="w-full" style={{ height: 'calc(100% - 2px)', background: 'rgba(255,255,255,0.08)' }} />
+                    </div>
+                    {/* Value label */}
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ pointerEvents: 'none' }}>
+                      <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        {syl[cardMode]}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <button
             onClick={() => setSyllables([...syllables, { id: Date.now(), text: '', phonetic: true, ...globalVoice }])}
