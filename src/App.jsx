@@ -384,27 +384,15 @@ const App = () => {
     <div className="min-h-screen p-4 md:p-8 flex flex-col" style={{ background: 'var(--c64-bg)', color: 'var(--c64-text)' }}>
       <header className="max-w-6xl mx-auto w-full mb-8 pb-6" style={{ borderBottom: '2px solid var(--c64-border)' }}>
         <div className="flex flex-col gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 130" preserveAspectRatio="xMidYMid meet" className="w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 80" preserveAspectRatio="xMidYMid meet" className="w-full">
             <g style={{ stroke: cardMode !== null ? SAM_PARAMS.find(p => p.field === cardMode)?.color || 'var(--c64-cyan)' : 'var(--c64-cyan)' }} fill="none" strokeLinecap="square" strokeLinejoin="miter">
-              <path strokeWidth="3" d="M30,20 L90,20 L110,40 L90,60 L110,80 L90,110 L30,110 L20,100 L20,30 Z M45,35 L45,55 L75,55 L85,45 L75,35 Z M45,70 L45,95 L75,95 L85,85 L75,70 Z" />
-              <path strokeWidth="3" d="M130,20 L170,20 L170,35 L160,35 L160,95 L170,95 L170,110 L130,110 L130,95 L140,95 L140,35 L130,35 Z" />
-              <path strokeWidth="3" d="M190,20 L270,20 L270,35 L245,35 L245,110 L215,110 L215,35 L190,35 Z" />
-              <path strokeWidth="3" d="M290,50 L330,50 L310,75 L350,75 L320,100" strokeLinecap="round" />
-              <path strokeWidth="3" d="M370,20 L400,20 L430,90 L460,20 L490,20 L445,110 L415,110 Z" />
-              <path strokeWidth="3" d="M510,20 L570,20 L590,40 L590,90 L570,110 L510,110 L490,90 L490,40 Z M520,40 L520,90 L560,90 L560,40 Z" />
-              <path strokeWidth="3" d="M610,20 L640,20 L665,55 L690,20 L720,20 L680,65 L720,110 L690,110 L665,75 L640,110 L610,110 L650,65 Z" />
-              <path strokeWidth="1" d="M10,40 L25,40 M5,50 L20,50 M10,60 L25,60" />
-              <path strokeWidth="1" d="M60,115 L60,125" />
-              <path strokeWidth="1" d="M275,15 L285,5 L295,15" />
-              <path strokeWidth="1" d="M300,40 L310,30 M330,110 L340,120 M360,65 L370,65" />
-              <path strokeWidth="1" d="M360,30 L350,40" />
-              <path strokeWidth="1" d="M570,30 L580,30" />
-              <path strokeWidth="1" d="M620,120 L710,120 L720,115" />
-              <path strokeWidth="1" d="M730,30 L745,30 M750,40 L760,40 M735,100 L745,100" />
-              <path strokeWidth="2" d="M760,80 L762,80 M770,70 L772,70 M750,110 L752,110" strokeLinecap="round"/>
-              <path strokeWidth="1" d="M100,5 L110,15 L100,25" />
-              <path strokeWidth="1" d="M480,125 L500,125 L490,115" />
-              <path strokeWidth="1" d="M680,5 L690,5 L685,15 Z" />
+              <path strokeWidth="2" d="M30,65 L30,25 L80,25 L90,35 L80,45 L90,55 L80,65 Z M45,55 L45,15 L95,15 L105,25 L95,35 L105,45 L95,55 Z M30,25 L45,15 M80,25 L95,15 M90,35 L105,25 M90,55 L105,45 M80,65 L95,55 M30,65 L45,55" />
+              <path strokeWidth="2" d="M155,65 L155,25 L175,25 L175,65 Z M170,55 L170,15 L190,15 L190,55 Z M155,25 L170,15 M175,25 L190,15 M175,65 L190,55 M155,65 L170,55" />
+              <path strokeWidth="2" d="M245,65 L245,40 L225,40 L225,25 L285,25 L285,40 L265,40 L265,65 Z M260,55 L260,30 L240,30 L240,15 L300,15 L300,30 L280,30 L280,55 Z M225,25 L240,15 M285,25 L300,15 M285,40 L300,30 M265,65 L280,55 M245,65 L260,55 M225,40 L240,30" />
+              <path strokeWidth="2" d="M330,50 L330,40 L350,40 L350,50 Z M345,40 L345,30 L365,30 L365,40 Z M330,40 L345,30 M350,40 L365,30 M350,50 L365,40 M330,50 L345,40" />
+              <path strokeWidth="2" d="M425,65 L395,25 L415,25 L435,55 L455,25 L475,25 L445,65 Z M440,55 L410,15 L430,15 L450,45 L470,15 L490,15 L460,55 Z M395,25 L410,15 M415,25 L430,15 M455,25 L470,15 M475,25 L490,15 M445,65 L460,55 M425,65 L440,55" />
+              <path strokeWidth="2" d="M505,65 L505,25 L565,25 L565,65 Z M520,55 L520,15 L580,15 L580,55 Z M505,25 L520,15 M565,25 L580,15 M565,65 L580,55 M505,65 L520,55 M525,55 L525,35 L545,35 L545,55 Z M540,45 L540,25 L560,25 L560,45 Z M525,35 L540,25 M545,35 L560,25 M545,55 L560,45 M525,55 L540,45" />
+              <path strokeWidth="2" d="M625,25 L645,25 L655,40 L665,25 L685,25 L665,50 L685,65 L665,65 L655,50 L645,65 L625,65 L645,40 Z M640,15 L660,15 L670,30 L680,15 L700,15 L680,40 L700,55 L680,55 L670,40 L660,55 L640,55 L660,30 Z M625,25 L640,15 M645,25 L660,15 M665,25 L680,15 M685,25 L700,15 M685,65 L700,55 M665,65 L680,55 M645,65 L660,55 M625,65 L640,55 M645,40 L660,30 M655,40 L670,30 M665,50 L680,40 M655,50 L670,40" />
             </g>
           </svg>
         </div>
