@@ -72,13 +72,21 @@
 
 ---
 
+### Phase 7: GitHub Pages Deployment ✅
+- [x] Set Vite `base: '/bit-vox/'` for GitHub Pages subpath
+- [x] Replace Vite default favicon with app-branded SVG
+- [x] Add GitHub Actions workflow for automatic deploy on push to main
+- Depends on: Phase 6
+
+---
+
 ## Current Focus
 
-**Phase 6 in progress.** UI polish and branding. Header SVG and slider UX complete.
+**Phase 7 complete.** App is ready for GitHub Pages deployment.
 
 ### Next up
-- Cross-browser audio testing
-- Mobile responsiveness testing
+- Cross-browser audio testing (backlog)
+- Mobile responsiveness testing (backlog)
 
 ### Blocked / Known Issues
 _(none)_
