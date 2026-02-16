@@ -5,8 +5,8 @@ import { SAM_PHONEMES, PHONEME_CATEGORIES } from './lib/sam-phonemes.js';
 
 const SAM_DEFAULTS = { pitch: 64, speed: 72, mouth: 128, throat: 128 };
 const SAM_PARAMS = [
-  { field: 'pitch', label: 'PITCH', min: 1, max: 255, color: 'var(--c64-yellow)' },
-  { field: 'speed', label: 'SPEED', min: 40, max: 200, color: 'var(--c64-orange)' },
+  { field: 'pitch', label: 'PITCH', min: 1, max: 255, color: 'var(--c64-yellow)', invert: true },
+  { field: 'speed', label: 'SPEED', min: 40, max: 200, color: 'var(--c64-orange)', invert: true },
   { field: 'mouth', label: 'MOUTH', min: 0, max: 255, color: 'var(--c64-ltblue)' },
   { field: 'throat', label: 'THROAT', min: 0, max: 255, color: 'var(--c64-purple)' },
 ];
@@ -71,7 +71,8 @@ const App = () => {
         const rect = el.getBoundingClientRect();
         if (e.clientX >= rect.left && e.clientX <= rect.right &&
             e.clientY >= rect.top && e.clientY <= rect.bottom) {
-          const ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+          let ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+          if (param.invert) ratio = 1 - ratio;
           const value = Math.round(param.min + ratio * (param.max - param.min));
           const id = Number(idStr);
           setSyllables(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
@@ -102,7 +103,8 @@ const App = () => {
     const el = cardRefs.current[sylId];
     if (el) {
       const rect = el.getBoundingClientRect();
-      const ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+      let ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+      if (param.invert) ratio = 1 - ratio;
       const value = Math.round(param.min + ratio * (param.max - param.min));
       setSyllables(prev => prev.map(s => s.id === sylId ? { ...s, [field]: value } : s));
     }
@@ -130,7 +132,7 @@ const App = () => {
     if (!param) return;
 
     const pixelDelta = ref.startY - e.clientY;
-    let delta = Math.round(pixelDelta * (param.max - param.min) / 200);
+    let delta = Math.round((param.invert ? -pixelDelta : pixelDelta) * (param.max - param.min) / 200);
 
     for (const syl of ref.startSyllables) {
       delta = Math.min(delta, param.max - syl[field]);
@@ -377,7 +379,8 @@ const App = () => {
   const getBarRatio = (value, field) => {
     const param = SAM_PARAMS.find(p => p.field === field);
     if (!param) return 0;
-    return (value - param.min) / (param.max - param.min);
+    const ratio = (value - param.min) / (param.max - param.min);
+    return param.invert ? 1 - ratio : ratio;
   };
 
   return (
