@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-02-15 (Phase 6 in progress)
+> Last updated: 2026-02-16 (Phase 6 in progress)
 
 ---
 
@@ -65,8 +65,8 @@
 - [x] Color-reactive input text and generate button
 - [x] Remove card number badges
 - [x] Remove fixed stats footer — inline slice info next to controls
-- [x] SVG graffiti header banner (Gemini-generated, replaces h1)
-- [ ] Refine header SVG with Gemini — iterate on letter style, fill space better [Gemini]
+- [x] SVG header — low-poly wireframe 3D letterforms (Gemini-generated from reference PNG)
+- [x] Invert pitch/speed slider controls — higher bar = higher pitch/speed
 - [ ] Cross-browser audio testing (from Phase 4 backlog)
 - [ ] Mobile responsiveness testing (from Phase 4 backlog)
 
@@ -74,11 +74,11 @@
 
 ## Current Focus
 
-**Phase 6 in progress.** UI polish and branding. Header SVG integrated but needs refinement.
+**Phase 6 in progress.** UI polish and branding. Header SVG and slider UX complete.
 
 ### Next up
-- Iterate on header SVG with Gemini (letter style, graffiti energy, space filling)
-- Cross-browser / mobile testing
+- Cross-browser audio testing
+- Mobile responsiveness testing
 
 ### Blocked / Known Issues
 _(none)_
