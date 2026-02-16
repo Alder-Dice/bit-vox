@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-02-16 (Phase 6 in progress)
+> Last updated: 2026-02-16 (Phase 7 complete)
 
 ---
 
@@ -59,7 +59,7 @@
 
 ---
 
-### Phase 6: UI Polish & Branding (In Progress)
+### Phase 6: UI Polish & Branding ✅
 - [x] Compact header controls — preview/export as icon buttons in generate row
 - [x] Per-parameter colors (yellow, orange, ltblue, purple) for mode cards and step bars
 - [x] Color-reactive input text and generate button
@@ -73,7 +73,7 @@
 ---
 
 ### Phase 7: GitHub Pages Deployment ✅
-- [x] Set Vite `base: '/bit-vox/'` for GitHub Pages subpath
+- [x] Set Vite relative base path for GitHub Pages compatibility
 - [x] Replace Vite default favicon with app-branded SVG
 - [x] Add GitHub Actions workflow for automatic deploy on push to main
 - Depends on: Phase 6
@@ -82,7 +82,8 @@
 
 ## Current Focus
 
-**Phase 7 complete.** App is ready for GitHub Pages deployment.
+**Phase 7 complete.** App deployed and verified on GitHub Pages.
+Live at: https://alder-dice.github.io/bit-vox/
 
 ### Next up
 - Cross-browser audio testing (backlog)
